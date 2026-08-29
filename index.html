@@ -1744,10 +1744,7 @@ function mostrarListo(datos, r){
       <p>Quedó con el folio <b>${datos.folio}</b>, a nombre de <b>${datos.inst}</b>.
          Ya tenemos tus datos y te vamos a buscar para ayudarte a ajustarla si hace falta.
          Si quieres que sea hoy mismo, escríbenos y menciona ese folio.</p>
-      <p style="margin-top:-4px">Y aquí está la guía que te prometimos. Es un archivo aparte, con tu calendario y tus perfiles:</p>
-      <div class="lbtns" style="margin-bottom:14px">
-        <a class="lbtn guia" href="#" id="lnk-guia">↓ Descargar la guía del programa anual</a>
-      </div>
+      <p style="margin-top:-6px">La guía para armar tu programa anual está en el botón de arriba, por si aún no la bajas.</p>
       <div class="lbtns">
         <a class="lbtn wa" href="#" id="lnk-listo-wa">✆ Escribir por WhatsApp</a>
         <a class="lbtn mail" href="#" id="lnk-listo-mail">✉ Escribir por correo</a>
@@ -1857,7 +1854,6 @@ document.addEventListener('click', e => {
   }
   if(id==='b-ver'){ e.preventDefault(); abrir('ver'); }
   if(id==='lnk-otra'){ e.preventDefault(); limpiarTodo(); }
-  if(id==='lnk-guia'){ e.preventDefault(); generarGuia(listoDatos, calcular()); }
   if(id==='lnk-listo-wa'){ e.preventDefault(); enviarWhatsApp(listoDatos); }
   if(id==='lnk-listo-mail'){ e.preventDefault(); enviarCorreo(listoDatos); }
   if(id==='lnk-wa-general'){
