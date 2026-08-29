@@ -49,6 +49,66 @@ Los cuatro eventos ya están programados y no hay que configurar nada:
 | Descarga la cotización | `Lead` | monto, personas e institución |
 | Abre WhatsApp | `Contact` | monto y número de personas |
 
+### ¿A dónde llegan los datos de quien cotiza? — LÉASE ANTES DE PUBLICAR
+
+**Con `clientify` y `respaldo` vacíos, como viene el archivo, los datos NO se guardan en ningún lado.** La persona llena su nombre, correo y teléfono, ve su cotización, se va, y nadie se entera de que estuvo. La página escribe una advertencia en la consola del navegador cada vez que eso pasa, pero nadie la va a estar viendo.
+
+Hay que llenar al menos uno de los dos antes de gastar el primer peso de pauta.
+
+| Campo | Qué es | Recomendación |
+|---|---|---|
+| `clientify` | La dirección `action` del formulario público de Clientify. Cada solicitud entra como contacto en el CRM. | Es el destino principal. |
+| `respaldo` | Una copia de la misma solicitud a un segundo lugar. Lo más práctico es un **Formulario de Google**, porque las respuestas caen solas en una hoja de cálculo propia. | Muy recomendable. Es la base de datos que sigue siendo tuya aunque cambien de CRM. |
+
+Los dos funcionan al mismo tiempo y son independientes: si uno falla, el otro recibe igual.
+
+#### Qué se manda exactamente
+
+Catorce campos por cada solicitud: institución, tipo de entidad, nombre, correo, teléfono, número de personas, tramo de descuento, porcentaje aplicado, subtotal, IVA, total, folio, el detalle línea por línea (`15 x Capacitación Anual General 2026 | 3 x Alta Dirección…`) y el origen.
+
+#### En qué momento se manda
+
+En el momento en que la persona se identifica, **no** al descargar el PDF. Si llena el formulario y luego cierra la pestaña sin descargar nada, el prospecto ya quedó registrado.
+
+#### Respaldo con Formulario de Google, paso a paso
+
+1. Crear un formulario nuevo en Google Forms con una pregunta de respuesta corta por cada dato.
+2. Vista previa → clic derecho → *Inspeccionar*. Cada campo tiene un nombre tipo `entry.123456789`. Anotarlos.
+3. La dirección de envío es la del formulario cambiando `/viewform` por `/formResponse`.
+4. En el cotizador:
+
+```js
+respaldo: 'https://docs.google.com/forms/d/e/XXXXXXXX/formResponse',
+respaldoFormato: 'form',
+respaldoCampos: {
+  institucion:'entry.111', tipo_entidad:'entry.222', nombre:'entry.333',
+  correo:'entry.444', telefono:'entry.555', personas:'entry.666',
+  tramo:'entry.777', descuento:'entry.888', subtotal:'entry.999',
+  iva:'entry.1010', total:'entry.1111', folio:'entry.1212',
+  detalle:'entry.1313', origen:'entry.1414'
+}
+```
+
+5. En Google Forms, pestaña *Respuestas* → *Vincular a Hojas de cálculo*. Ahí queda la base.
+
+Si `respaldoCampos` se deja vacío, se usan los mismos nombres de `CONFIG.campos` (sirve para webhooks, no para Google Forms).
+
+---
+
+### Cuándo se piden los datos
+
+`CONFIG.momentoDatos` tiene tres valores:
+
+| Valor | Qué hace | Cuándo conviene |
+|---|---|---|
+| `'resultado'` | **Por defecto.** La persona captura su plantilla y ve que su programa quedó armado, pero para ver precios y total se identifica. | Es el equilibrio: casi nadie llega hasta ahí sin interés real, y quien se va sin identificarse tampoco se lleva el número. |
+| `'inicio'` | Pide los datos al cargar la página, antes de dejar usar la calculadora. Si la cierra, la calculadora funciona pero los precios siguen tapados. | Cuando importa más capturar que dejar explorar. Espanta a una parte de las visitas. |
+| `'descarga'` | Solo pide datos al generar el PDF. | Solo si se quiere máxima apertura y no importa perder contactos. |
+
+Con `'resultado'` e `'inicio'`, mientras no se identifique, quedan tapados el total, los precios por persona con descuento y las cifras del aviso de cambio de tramo. Lo que sí se ve es cuántas personas capturó y qué niveles le tocan: eso es lo que hace que valga la pena identificarse.
+
+---
+
 ### Clientify: a dónde llegan los prospectos
 
 Cada vez que alguien descarga su cotización, la página puede mandar los datos a Clientify. Hay dos rutas y **ninguna de las dos usa una llave de API**, por una razón importante:

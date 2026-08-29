@@ -118,6 +118,31 @@ table.lines td.dsc{color:var(--ok);font-weight:800}
 .btn-mail:hover:not(:disabled){background:var(--naranja-bg);border-color:var(--naranja)}
 
 /* ── Contacto siempre a la mano ── */
+.gate{padding:26px 22px 24px;text-align:center}
+.gate .g-ico{width:44px;height:44px;border-radius:12px;background:var(--naranja-bg);color:var(--naranja-d);
+  font-size:1.3rem;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 13px}
+.gate h3{font-size:1.12rem;color:var(--ink);font-weight:700;margin-bottom:7px}
+.gate p{font-size:.91rem;color:var(--muted);max-width:46ch;margin:0 auto 16px;line-height:1.55}
+.gate .g-resumen{display:inline-flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px}
+.gate .g-pill{font-size:.78rem;font-weight:700;background:var(--bg);border:1px solid var(--linea);
+  color:var(--ink-2);padding:5px 11px;border-radius:20px}
+.gate .btn{display:inline-flex;flex:0 0 auto;min-width:230px}
+.gate .g-nota{font-size:.76rem;color:var(--muted);margin-top:12px}
+
+.listo{margin-top:16px;background:#EEF9F1;border:1px solid #C4E9CE;border-radius:14px;padding:20px 22px}
+.listo .lt{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.listo .lt span{width:26px;height:26px;border-radius:50%;background:var(--ok);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0}
+.listo h3{font-size:1.05rem;color:#164028;font-weight:700}
+.listo p{font-size:.9rem;color:#1F5638;line-height:1.55;margin-bottom:14px}
+.listo p b{color:#0F3020}
+.listo .lbtns{display:flex;gap:9px;flex-wrap:wrap}
+.listo .lbtn{padding:12px 17px;border-radius:10px;font-size:.89rem;font-weight:700;cursor:pointer;
+  border:0;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+.listo .lbtn.wa{background:#1FA855;color:#fff}
+.listo .lbtn.mail{background:#fff;color:#1F5638;border:1.5px solid #C4E9CE}
+.listo .lbtn:hover{filter:brightness(1.06)}
+
 .contacto-nota{margin-top:10px;font-size:.82rem;color:var(--muted);text-align:center}
 .fab{position:fixed;right:18px;bottom:22px;z-index:50;display:flex;align-items:center;gap:9px;
   background:#1FA855;color:#fff;text-decoration:none;font-weight:700;font-size:.9rem;
@@ -233,7 +258,7 @@ footer b{color:var(--ink)}
       <span class="chip"><i>✓</i> Constancia individual por persona</span>
       <span class="chip"><i>✓</i> En línea, 24/7, a su propio ritmo</span>
       <span class="chip"><i>✓</i> Vigencia a todo 2026</span>
-      <span class="chip"><i>✓</i> Facturamos y aceptamos orden de compra</span>
+      <span class="chip"><i>✓</i> Un responsable asignado a tu institución</span>
     </div>
   </div>
 </header>
@@ -284,6 +309,7 @@ footer b{color:var(--ink)}
       <button class="btn btn-mail" id="b-mail"><span>✉</span> Escribir por correo</button>
     </div>
     <div class="contacto-nota" id="contacto-nota"></div>
+    <div id="listo"></div>
   </section>
 
   <section>
@@ -349,7 +375,7 @@ footer b{color:var(--ink)}
 <div class="ov" id="ov">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle">
     <h3 id="mtitle">Ya casi. ¿A nombre de quién la emitimos?</h3>
-    <p>Con estos datos generamos tu cotización con folio y desglose, en PDF, lista para que la adjuntes a tu solicitud interna. Son treinta segundos.</p>
+    <p id="msub">Con estos datos generamos tu cotización con folio y desglose, en PDF, lista para que la adjuntes a tu solicitud interna. Son treinta segundos.</p>
 
     <div class="f">
       <label for="i-inst">Institución</label>
@@ -826,6 +852,22 @@ const CONFIG = {
   clientify: '',
   clientifyFormato: 'form',
 
+  /* ── RESPALDO (opcional pero muy recomendable) ─────────────
+     Un segundo destino que recibe UNA COPIA de cada solicitud.
+     Sirve para tener la base de datos en una hoja de cálculo propia,
+     independiente del CRM: si Clientify falla, se cambia de plan o
+     alguien borra algo, la base sigue existiendo.
+     Lo más práctico es un Formulario de Google, porque las respuestas
+     caen solas en una hoja de cálculo que es tuya. El paso a paso está
+     en el README y en el manual de Gaby.
+     Aquí tampoco va nunca un token ni una contraseña.            */
+  respaldo: '',
+  respaldoFormato: 'form',
+  /* Si el respaldo es un Formulario de Google, sus campos NO se llaman
+     como los de Clientify: se llaman entry.123456789. Se mapean aquí.
+     Se deja vacío para usar los mismos nombres de CONFIG.campos.   */
+  respaldoCampos: {},
+
   /* Nombres de los campos del lado de Clientify. Si el formulario usa
      otros nombres, se cambian aquí y no hay que tocar nada más. */
   campos: {
@@ -834,6 +876,18 @@ const CONFIG = {
     tramo:'tramo', descuento:'descuento', subtotal:'subtotal',
     iva:'iva', total:'total', folio:'folio', detalle:'detalle', origen:'origen'
   },
+
+  /* ── CUÁNDO SE PIDEN LOS DATOS DE CONTACTO ─────────────────
+     'resultado'  Recomendado. La persona captura su plantilla y, para
+                  ver los precios y el total, se identifica. Casi nadie
+                  llega hasta ahí sin interés real, y quien se va sin
+                  identificarse tampoco se lleva el número.
+     'inicio'     Se piden antes de dejar usar la calculadora. Captura a
+                  todos los que continúan, pero pierde a los que se
+                  espantan con un formulario en la puerta.
+     'descarga'   Solo al descargar el PDF. Es el que más gente deja
+                  entrar y el que menos datos deja.                  */
+  momentoDatos: 'resultado',
 
   sitio:   '360educa.com',
   correo:  'capacitacion@gmc360.com.mx',
@@ -1011,7 +1065,7 @@ const etiquetaTramo = r => r.pct > 0
   : r.tramo.label;
 
 /* ── Aviso de tramo: cuánto conviene subir al siguiente escalón ── */
-function avisoTramo(r){
+function avisoTramo(r, tapar){
   const cont = $('aviso-tramo');
   if (!r.personas){ cont.innerHTML=''; return; }
   const siguientes = CONFIG.tramos.filter(t => t.min > r.personas).sort((a,b)=>a.min-b.min);
@@ -1029,6 +1083,15 @@ function avisoTramo(r){
       return a + precioUnitario(n, sig) * q; },0));
   const dif = cent(r.total - nuevoTotal);
   const gente = faltan===1 ? 'persona' : 'personas';
+  /* Con los precios tapados el aviso sigue siendo útil, pero sin cifras. */
+  if (tapar){
+    cont.innerHTML = `<div class="aviso${dif>0?' verde':''}"><span class="aviso-ico">▸</span><div>`
+      + (dif>0
+         ? `<b>Con ${faltan} ${gente} más, el total baja.</b> A partir de ${sig.min} personas cambias de tramo y el precio por persona es menor, así que cubrir a más gente te sale más barato en total.`
+         : `Con ${faltan} ${gente} más entras al tramo de <b>${sig.label}</b> y baja el precio por persona.`)
+      + `</div></div>`;
+    return;
+  }
   cont.innerHTML = dif > 0
     ? `<div class="aviso verde"><span class="aviso-ico">▸</span><div><b>Con ${faltan} ${gente} más el total baja de ${mx(r.total)} a ${mx(nuevoTotal)}.</b> A partir de ${sig.min} personas cambias de tramo y el precio por persona es menor, así que cubrir a más gente te sale más barato en total.</div></div>`
     : `<div class="aviso"><span class="aviso-ico">▸</span><div>Con ${faltan} ${gente} más entras al tramo de <b>${sig.label}</b> y baja el precio por persona: el total quedaría en ${mx(nuevoTotal)}.</div></div>`;
@@ -1042,12 +1105,16 @@ function render(){
   /* El PDF necesita al menos una persona capturada; escribirnos, nunca:
      alguien con dudas debe poder contactarnos desde el primer segundo. */
   $('b-pdf').disabled = !hay;
+
+  /* ¿Hay que tapar los números hasta saber quién es? */
+  const tapar = CONFIG.momentoDatos !== 'descarga' && !identificado;
+
   NIVELES.forEach(n => {
     $('row-'+n.id).classList.toggle('on', cantidades[n.id] > 0);
     /* La etiqueta habla en el mismo idioma que el sitio: precio con IVA por
        persona. Con descuento, se tacha el de lista y se muestra el nuevo. */
     const t  = $('tag-'+n.id);
-    if (r.pct > 0){
+    if (r.pct > 0 && !tapar){
       const conIVA = cent(precioUnitario(n, r.tramo) * (1 + CONFIG.iva.tasa));
       t.innerHTML = '<s style="opacity:.55;font-weight:600">' + mx(n.lista) + '</s> ' +
         '<b>' + mx(conIVA) + '</b> por persona · ' + Math.round(r.pct*100) + '% menos';
@@ -1061,13 +1128,18 @@ function render(){
 
   $('bar').classList.toggle('show', hay);
   $('fab-wa').classList.toggle('subir', hay);
-  $('bar-people').textContent = r.personas + (r.personas===1?' persona':' personas') + (r.pct>0?'  ·  −'+Math.round(r.pct*100)+'%':'');
-  $('bar-total').innerHTML = mx(r.total) + ' <small style="font-size:.6em;font-weight:600;color:var(--muted)">con IVA</small>';
+  $('bar-people').textContent = r.personas + (r.personas===1?' persona':' personas') + (r.pct>0 && !tapar ?'  ·  −'+Math.round(r.pct*100)+'%':'');
+  $('bar-total').innerHTML = tapar
+    ? '<span style="font-size:.72em">Tu cotización está lista</span>'
+    : mx(r.total) + ' <small style="font-size:.6em;font-weight:600;color:var(--muted)">con IVA</small>';
+  $('b-bar').textContent = tapar ? 'Ver mi cotización' : 'Ver cotización ↓';
   $('head-count').textContent = hay
-    ? r.personas + (r.personas===1?' persona · ':' personas · ') + etiquetaTramo(r)
+    ? r.personas + (r.personas===1?' persona · ':' personas · ') + (tapar ? 'listo para calcular' : etiquetaTramo(r))
     : 'Sin personas capturadas';
 
-  avisoTramo(r);
+  avisoTramo(r, tapar);
+
+  if (hay && tapar){ $('out').innerHTML = cortina(r); return; }
 
   if (!hay){ $('out').innerHTML='<div class="empty">Escribe arriba cuántas personas hay en cada grupo y aquí se arma tu programa completo.</div>'; return; }
 
@@ -1101,7 +1173,24 @@ function render(){
       <div class="tline"><span>IVA ${pctIVA()}%</span><span>${mx2(r.iva)}</span></div>
       <div class="tline grand"><span>Total</span><span>${mx2(r.total)}</span></div>
     </div>
-    <div class="note"><b>Ya incluido en este precio:</b> constancia individual por persona, materiales descargables, seguimiento de avance, un responsable asignado a tu institución y vigencia hasta el 31 de diciembre de ${CONFIG.ciclo}. Facturamos y aceptamos transferencia u orden de compra.<br><br>Las partidas se presentan sin IVA y el impuesto se suma una sola vez al final; los precios publicados en ${CONFIG.sitio} incluyen IVA y aquí aparecen desglosados, como en cualquier cotización formal.</div>` + sugerenciaPerso(r);
+    <div class="note"><b>Ya incluido en este precio:</b> constancia individual por persona, materiales descargables, seguimiento de avance, un responsable asignado a tu institución y vigencia hasta el 31 de diciembre de ${CONFIG.ciclo}.<br><br>Las partidas se presentan sin IVA y el impuesto se suma una sola vez al final; los precios publicados en ${CONFIG.sitio} incluyen IVA y aquí aparecen desglosados, como en cualquier cotización formal.</div>` + sugerenciaPerso(r);
+}
+
+/* La cortina: se ve el trabajo hecho (cuántas personas, cuántos niveles)
+   pero no el precio. Quien llegó hasta aquí ya tiene interés real; pedirle
+   su nombre en este punto cuesta mucho menos que pedírselo en la puerta. */
+function cortina(r){
+  const pills = r.lineas.map(l =>
+    `<span class="g-pill">${l.qty} · ${l.course.replace('Capacitación Anual │ ','').replace('Curso de ','').replace(' 2026','')}</span>`
+  ).join('');
+  return `<div class="gate">
+    <div class="g-ico">✓</div>
+    <h3>Tu programa está armado: ${r.personas} ${r.personas===1?'persona':'personas'} en ${r.lineas.length} ${r.lineas.length===1?'nivel':'niveles'}</h3>
+    <div class="g-resumen">${pills}</div>
+    <p>Dinos a nombre de quién la emitimos y te mostramos el desglose por nivel, tu descuento por volumen y el total.</p>
+    <button class="btn btn-pdf" id="b-ver">Ver mi cotización</button>
+    <div class="g-nota">Treinta segundos. Solo la usamos para emitir tu cotización y darte seguimiento.</div>
+  </div>`;
 }
 
 /* Cuando la plantilla es grande, la conversación natural ya no es catálogo:
@@ -1126,16 +1215,45 @@ function fechaLarga(){
   const d=new Date(); return d.getDate()+' de '+m[d.getMonth()]+' de '+d.getFullYear();
 }
 
-/* ── Modal ── */
-const abrir = () => {
+/* ── Modal ──
+   'motivo' dice para qué se abrió: 'ver' es la cortina que destapa los
+   precios, 'pdf' es la descarga. Cambia el título y lo que pasa al enviar. */
+let identificado = false;   // ya sabemos quién es
+let cliente = null;         // sus datos, para no volvérselos a pedir
+let motivoModal = 'pdf';
+
+const TEXTOS_MODAL = {
+  ver: {
+    t: '¿A nombre de quién armamos la cotización?',
+    p: 'Con estos datos te mostramos el desglose por nivel y el total con tu descuento, y te la dejamos guardada por si necesitas que la revisemos contigo.'
+  },
+  pdf: {
+    t: 'Ya casi. ¿A nombre de quién la emitimos?',
+    p: 'Con estos datos generamos tu cotización con folio y desglose, en PDF, lista para que la adjuntes a tu solicitud interna. Son treinta segundos.'
+  },
+  inicio: {
+    t: 'Antes de empezar, ¿quién eres?',
+    p: 'Así podemos emitir la cotización a nombre de tu institución y darte seguimiento si necesitas ajustarla. Son treinta segundos y luego armas tu programa.'
+  }
+};
+
+const abrir = (motivo) => {
+  motivoModal = motivo || 'pdf';
   const r = calcular();
+  const T = TEXTOS_MODAL[motivoModal] || TEXTOS_MODAL.pdf;
+  $('mtitle').textContent = T.t;
+  $('msub').textContent = T.p;
+  $('b-go').textContent = motivoModal === 'pdf' ? 'Descargar mi cotización' : 'Ver mi cotización';
   ev('InitiateCheckout', { value:r.total, currency:'MXN', num_items:r.personas });
   $('ov').classList.add('show'); document.body.style.overflow='hidden';
   setTimeout(()=>$('i-inst').focus(),90);
 };
 const cerrar = () => { $('ov').classList.remove('show'); document.body.style.overflow=''; };
-$('b-pdf').addEventListener('click', abrir);
-$('b-bar').addEventListener('click', () => $('#out')||document.querySelector('#out').scrollIntoView({behavior:'smooth',block:'center'}));
+$('b-pdf').addEventListener('click', () => identificado ? descargar() : abrir('pdf'));
+$('b-bar').addEventListener('click', () => {
+  if (CONFIG.momentoDatos !== 'descarga' && !identificado){ abrir('ver'); return; }
+  document.querySelector('.result').scrollIntoView({behavior:'smooth',block:'start'});
+});
 $('b-close').addEventListener('click', cerrar);
 $('ov').addEventListener('click', e => { if(e.target===$('ov')) cerrar(); });
 document.addEventListener('keydown', e => { if(e.key==='Escape') cerrar(); });
@@ -1159,8 +1277,30 @@ function validar(){
 }
 
 /* ── Envío del prospecto ── */
+/* Manda los datos a una dirección. No espera respuesta ni la puede leer:
+   'no-cors' es lo que permite escribir en un formulario de otro dominio
+   sin necesitar ninguna llave. Por eso esta página no guarda secretos. */
+function postar(url, formato, valores){
+  try{
+    if (formato === 'json'){
+      fetch(url, { method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(valores) }).catch(()=>{});
+    } else {
+      const body = new URLSearchParams();
+      Object.keys(valores).forEach(k => body.append(k, valores[k]));
+      fetch(url, { method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body: body.toString() }).catch(()=>{});
+    }
+  } catch(e){}
+}
+
 function enviarProspecto(datos, r){
-  if (!CONFIG.clientify) return;
+  if (!CONFIG.clientify && !CONFIG.respaldo){
+    console.warn('[360Educa] Nadie está recibiendo esta solicitud: CONFIG.clientify y CONFIG.respaldo están vacíos. Los datos de ' + datos.mail + ' NO se guardaron en ningún lado.');
+    return;
+  }
   const C = CONFIG.campos, v = {};
   v[C.institucion]  = datos.inst;
   v[C.tipo_entidad] = datos.tipo;
@@ -1177,45 +1317,74 @@ function enviarProspecto(datos, r){
   v[C.detalle]      = r.lineas.map(l => l.qty + ' x ' + l.course).join(' | ');
   v[C.origen]       = 'Cotizador capacitación anual ' + CONFIG.ciclo;
 
-  try {
-    if (CONFIG.clientifyFormato === 'json') {
-      /* Webhook de Make, Zapier o similar */
-      fetch(CONFIG.clientify, {
-        method:'POST', mode:'no-cors',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(v)
-      }).catch(()=>{});
-    } else {
-      /* Formulario público de Clientify: espera los campos codificados
-         como los mandaría un formulario HTML normal. */
-      const body = new URLSearchParams();
-      Object.keys(v).forEach(k => body.append(k, v[k]));
-      fetch(CONFIG.clientify, {
-        method:'POST', mode:'no-cors',
-        headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body: body.toString()
-      }).catch(()=>{});
+  /* Destino principal: el CRM */
+  if (CONFIG.clientify) postar(CONFIG.clientify, CONFIG.clientifyFormato, v);
+
+  /* Copia de respaldo: la base de datos propia */
+  if (CONFIG.respaldo){
+    const M = CONFIG.respaldoCampos || {};
+    let w = v;
+    if (Object.keys(M).length){
+      /* Traduce los nombres de campo al vocabulario del respaldo.
+         Ejemplo con Google Forms: { correo:'entry.1234567' }          */
+      w = {};
+      Object.keys(M).forEach(clave => {
+        const origen = CONFIG.campos[clave];
+        if (origen !== undefined && v[origen] !== undefined) w[M[clave]] = v[origen];
+      });
     }
-  } catch(e){}
+    postar(CONFIG.respaldo, CONFIG.respaldoFormato, w);
+  }
 }
 
 $('b-go').addEventListener('click', () => {
   if(!validar()) return;
   const r = calcular();
-  const datos = {
+  cliente = {
     inst:$('i-inst').value.trim(), tipo:$('i-tipo').value,
     name:$('i-name').value.trim(), mail:$('i-mail').value.trim(),
-    tel:$('i-tel').value.trim(), folio: folio()
+    tel:$('i-tel').value.trim(), folio: (cliente && cliente.folio) || folio()
   };
-  ev('Lead', { value:r.total, currency:'MXN', num_items:r.personas, content_name:datos.inst });
-  enviarProspecto(datos, r);
-  generarPDF(datos, r);
+  /* El prospecto se registra AQUÍ, en el momento en que se identifica,
+     no al descargar. Así queda en la base aunque después no descargue. */
+  if (!identificado){
+    identificado = true;
+    ev('Lead', { value:r.total, currency:'MXN', num_items:r.personas, content_name:cliente.inst });
+    enviarProspecto(cliente, r);
+  }
   cerrar();
-  setTimeout(()=>{
-    if(confirm('Tu PDF se descargó.\n\n¿Quieres mandarnos el resumen por WhatsApp para que te demos seguimiento hoy mismo?'))
-      enviarWhatsApp(datos);
-  },700);
+  render();
+  if (motivoModal === 'pdf') descargar();
+  else document.querySelector('.result').scrollIntoView({ behavior:'smooth', block:'start' });
 });
+
+function descargar(){
+  const r = calcular();
+  if(!cliente || !r.personas) return;
+  generarPDF(cliente, r);
+  mostrarListo(cliente, r);
+}
+
+/* Confirmación después de descargar. Cumple dos funciones: le dice a la
+   persona que su solicitud sí llegó, y le deja a la mano la vía rápida
+   para que la conversación empiece hoy y no en tres días. */
+function mostrarListo(datos, r){
+  const primer = (datos.name || '').split(' ')[0];
+  $('listo').innerHTML = `
+    <div class="listo">
+      <div class="lt"><span>✓</span><h3>Listo${primer ? ', ' + primer : ''}. Tu cotización se descargó.</h3></div>
+      <p>Quedó con el folio <b>${datos.folio}</b>, a nombre de <b>${datos.inst}</b>.
+         Ya tenemos tus datos y te vamos a buscar para ayudarte a ajustarla si hace falta.
+         Si quieres que sea hoy mismo, escríbenos y menciona ese folio.</p>
+      <div class="lbtns">
+        <a class="lbtn wa" href="#" id="lnk-listo-wa">✆ Escribir por WhatsApp</a>
+        <a class="lbtn mail" href="#" id="lnk-listo-mail">✉ Escribir por correo</a>
+      </div>
+    </div>`;
+  $('listo').scrollIntoView({ behavior:'smooth', block:'center' });
+  listoDatos = datos;
+}
+let listoDatos = null;
 
 /* ── WhatsApp ── */
 function textoWhatsApp(datos){
@@ -1237,7 +1406,7 @@ function textoWhatsApp(datos){
   L.push('Tramo aplicado: ' + etiquetaTramo(r));
   return L.join('\n');
 }
-function textoCorreo(){
+function textoCorreo(datos){
   const r = calcular();
   if(!r.personas) return 'Hola, quiero que me ayuden a armar la capacitación anual en PLD/FT de mi institución.\n\nInstitución:\nNúmero aproximado de personas:\n';
   const L=[];
@@ -1249,20 +1418,28 @@ function textoCorreo(){
   L.push('');
   L.push('Estimación: ' + mx2(r.total) + ' con IVA · ' + etiquetaTramo(r));
   L.push('');
-  L.push('Institución:');
-  L.push('Nombre de contacto:');
-  L.push('Teléfono:');
+  if (datos && datos.folio){
+    L.push('Folio: ' + datos.folio);
+    L.push('Institución: ' + (datos.inst || ''));
+    L.push('Contacto: ' + (datos.name || ''));
+    L.push('Teléfono: ' + (datos.tel || ''));
+  } else {
+    L.push('Institución:');
+    L.push('Nombre de contacto:');
+    L.push('Teléfono:');
+  }
   return L.join('\n');
 }
-function enviarCorreo(){
+function enviarCorreo(datos){
   const r = calcular();
   ev('Contact', { content_name:'Correo desde cotizador', value:r.total, currency:'MXN' });
   const asunto = r.personas
     ? 'Cotización de capacitación anual PLD/FT · ' + r.personas + ' personas'
+      + ((datos && datos.folio) ? ' · Folio ' + datos.folio : '')
     : 'Capacitación anual en PLD/FT para mi institución';
   window.location.href = 'mailto:' + CONFIG.correo +
     '?subject=' + encodeURIComponent(asunto) +
-    '&body='    + encodeURIComponent(textoCorreo());
+    '&body='    + encodeURIComponent(textoCorreo(datos));
 }
 function enviarWhatsApp(datos){
   const r = calcular();
@@ -1270,7 +1447,7 @@ function enviarWhatsApp(datos){
   window.open('https://wa.me/'+CONFIG.whatsapp+'?text='+encodeURIComponent(textoWhatsApp(datos)),'_blank');
 }
 $('b-wa').addEventListener('click', () => enviarWhatsApp(null));
-$('b-mail').addEventListener('click', enviarCorreo);
+$('b-mail').addEventListener('click', () => enviarCorreo(null));
 $('fab-wa').addEventListener('click', e => { e.preventDefault(); enviarWhatsApp(null); });
 function abrirWA(texto, etiqueta){
   ev('Contact', { content_name: etiqueta });
@@ -1289,6 +1466,9 @@ document.addEventListener('click', e => {
     window.location.href = 'mailto:'+CONFIG.correo+'?subject='+encodeURIComponent('Capacitación personalizada para mi institución')
       +'&body='+encodeURIComponent('Hola, me interesa la capacitación personalizada. Les cuento lo que necesitamos:\n\nInstitución:\nNúmero aproximado de personas:\nQué necesitamos distinto:\n');
   }
+  if(id==='b-ver'){ e.preventDefault(); abrir('ver'); }
+  if(id==='lnk-listo-wa'){ e.preventDefault(); enviarWhatsApp(listoDatos); }
+  if(id==='lnk-listo-mail'){ e.preventDefault(); enviarCorreo(listoDatos); }
   if(id==='lnk-wa-general'){
     e.preventDefault();
     const r = calcular();
@@ -1519,7 +1699,7 @@ function generarPDF(datos, r){
   const cond = doc.splitTextToSize(
     'Todos los importes están en pesos mexicanos. Las partidas se presentan sin IVA y el impuesto se suma una sola vez al final; los precios de lista publicados en ' + CONFIG.sitio + ' incluyen IVA y aquí aparecen desglosados. '
     + 'De 1 a 4 personas aplica el precio publicado en ' + CONFIG.sitio + '. A partir de 5 personas aplica un descuento por volumen sobre ese precio de lista, calculado con el total de personas de la institución. '
-    + 'Emitimos factura y aceptamos pago por transferencia u orden de compra. Esta cotización tiene una vigencia de 30 días naturales a partir de su fecha de emisión y constituye una estimación de inversión para efectos de planeación presupuestal; las condiciones definitivas se confirman al formalizar el pedido. '
+    + 'Esta cotización tiene una vigencia de 30 días naturales a partir de su fecha de emisión y constituye una estimación de inversión para efectos de planeación presupuestal; las condiciones definitivas se confirman al formalizar el pedido. '
     + 'Si tu operación requiere un temario propio, horas distintas o modalidad presencial, contamos con capacitación personalizada que se cotiza por proyecto.',
     W-M*2);
   doc.text(cond, M, y); y += cond.length*10 + 18;
@@ -1540,6 +1720,13 @@ function generarPDF(datos, r){
 }
 
 render();
+
+/* Modo 'inicio': se piden los datos antes de dejar usar la calculadora.
+   Si la persona cierra el formulario, la calculadora funciona pero los
+   precios siguen tapados hasta que se identifique. */
+if (CONFIG.momentoDatos === 'inicio'){
+  setTimeout(()=>{ if(!identificado) abrir('inicio'); }, 900);
+}
 </script>
 </body>
 </html>
