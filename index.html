@@ -326,6 +326,19 @@ footer b{color:var(--ink)}
   .bar-l strong{font-size:1.12rem}
 }
 </style>
+
+<!-- ══════════════════════════════════════════════════════════════
+     CÓDIGO DE SEGUIMIENTO DE CLIENTIFY
+     Es lo que permite que una "araña" de Clientify lea el formulario
+     de esta página y cree el contacto automáticamente.
+     Dominio autorizado: cotiza-capanual-360educa.netlify.app
+     Si el cotizador cambia de dirección, hay que actualizar el
+     dominio en Clientify o este código deja de registrar.
+     ══════════════════════════════════════════════════════════════ -->
+<!--Clientify Tracking Begins-->
+<script defer src="https://analyticsplusdev.clientify.net/analytics_plus/pixel/au9NguL9Wpxm8now"></script>
+<!--Clientify Tracking Ends-->
+
 </head>
 <body>
 
@@ -2594,19 +2607,6 @@ if (CONFIG.momentoDatos === 'inicio'){
   setTimeout(()=>{ if(!identificado) abrir('inicio'); }, 900);
 }
 </script>
-
-<!-- ══════════════════════════════════════════════════════════════
-     CÓDIGO DE SEGUIMIENTO DE CLIENTIFY
-     Pegar aquí, tal cual, el fragmento que da Clientify en su
-     configuración de Analytics o de código de seguimiento.
-     Es lo que hace posible que una "araña" de Clientify lea el
-     formulario de esta página y cree el contacto automáticamente.
-     Si no se usa Clientify, se deja este hueco vacío y la página
-     funciona igual.
-     ══════════════════════════════════════════════════════════════ -->
-<!-- INICIO CÓDIGO CLIENTIFY -->
-
-<!-- FIN CÓDIGO CLIENTIFY -->
 
 </body>
 </html>
