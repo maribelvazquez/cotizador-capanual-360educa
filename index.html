@@ -2137,6 +2137,43 @@ function generarGuia(datos, r){
   });
   y += 6;
 
+  /* Temas de coyuntura. Se nombran los asuntos, no cifras ni documentos
+     concretos: lo que cambia cada mes debe verificarse en la fuente
+     oficial antes de difundirlo hacia adentro. */
+  H('Temas de coyuntura del ciclo 2026', null, CORAL);
+  P('Los doce temas de arriba son la base fija del programa. Además conviene abrir espacio para lo que está pasando este año: es lo que hace que la difusión se lea como algo vivo y no como un requisito. Estos son los asuntos con más movimiento en el ciclo.');
+
+  tabla(['TEMA','POR QUÉ ESTE AÑO','CÓMO DIFUNDIRLO'],
+        [118, 232, ANCHO-350], [
+    ['**Hidrocarburos y huachicol',
+     'Es el foco de atención más visible del régimen preventivo en México. Han circulado alertas específicas para el sistema financiero sobre operaciones vinculadas al robo y comercialización ilícita de combustible.',
+     'Correo con las señales de alerta que apliquen a tus productos'],
+    ['**Jurisdicciones de mayor riesgo',
+     'Las listas del GAFI se actualizan varias veces al año y cada cambio mueve la debida diligencia reforzada de tus clientes y contrapartes.',
+     'Cápsula corta cada vez que haya actualización'],
+    ['**Mundial 2026',
+     'México es sede. Los eventos masivos concentran efectivo, reventa, hospedaje informal, apuestas y movimientos transfronterizos atípicos en fechas concretas.',
+     'Sesión corta antes y durante el evento, para áreas de atención'],
+    ['Riesgos geopolíticos y sanciones',
+     'Los conflictos y los regímenes de sanciones cambian rápido y afectan corresponsalías, transferencias y clientes con operación internacional.',
+     'Resumen trimestral para tesorería y cumplimiento'],
+    ['Fraude y suplantación de identidad',
+     'Es la puerta de entrada de buena parte de los recursos ilícitos y donde más rápido cambia la técnica: documentos alterados, identidades sintéticas, ingeniería social.',
+     'Caso práctico mensual para primer contacto'],
+    ['Activos virtuales y operación no presencial',
+     'La contratación remota y los activos virtuales siguen ampliando la superficie de riesgo, sobre todo en onboarding.',
+     'Cápsula para las áreas digitales y de originación'],
+    ['Beneficiario controlador',
+     'Sigue siendo el punto donde más expedientes quedan incompletos, y es de lo primero que se revisa.',
+     'Ejercicio práctico con estructuras reales del portafolio'],
+    ['Corrupción y personas políticamente expuestas',
+     'Los cambios de administración modifican quién es PPE y quién deja de serlo. La lista interna se desactualiza sola.',
+     'Recordatorio semestral con el criterio interno vigente']
+  ]);
+
+  nota('Antes de difundir cualquiera de estos temas, verifica en la fuente',
+    'Las listas, las alertas y los criterios cambian durante el año. Los temas de arriba son estables; los datos concretos no. Confirma la versión vigente en el portal de la Comisión y en el de la Unidad de Inteligencia Financiera antes de circular una cifra o una lista hacia adentro de tu institución. Difundir un dato vencido cuesta más credibilidad de la que suma la difusión.', CORAL);
+
   nota('Qué documentar de cada difusión',
     'Fecha, tema, canal utilizado, a quién se dirigió y el material o liga que se compartió. Con eso, doce correos al año se convierten en doce piezas de evidencia. Sin eso, no existieron.');
 
