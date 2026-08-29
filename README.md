@@ -28,6 +28,20 @@ correo:          'capacitacion@gmc360.com.mx'
 
 Si el número o el correo cambian, se editan aquí y se actualizan solos en la página, en los botones de WhatsApp y en el PDF.
 
+### Fotos (opcionales, pero valen mucho)
+
+Todas van en `assets/` y **todas son opcionales**: si el archivo no está, la imagen se oculta sola y la página se ve bien igual. Se configuran en el bloque `fotos` de `CONFIG`.
+
+| Archivo | Dónde sale | Medida sugerida |
+|---|---|---|
+| `assets/equipo.jpg` | Banda ancha bajo "Lo que estás contratando" | 1400 × 500 px |
+| `assets/medida.jpg` | Cuadro en la tarjeta de capacitación a la medida | 500 × 500 px |
+| `assets/asesor.jpg` | Retrato en "¿Prefieres que lo veamos juntos?" | 500 × 500 px |
+
+Además, en `CONFIG.fotos` se pueden llenar `asesorNombre` y `asesorRol` para que junto al retrato aparezca quién es. Es lo que más humaniza la página: deja de ser un formulario y pasa a ser una persona.
+
+**Fotos reales, nunca banco de imágenes.** El claustro, sesiones reales, oficinas reales. Este público reconoce el stock de inmediato y le resta credibilidad a la marca; es la misma instrucción que está en el brief de diseño.
+
 ### Logo
 
 Colócalo en `assets/logo.png`. PNG con fondo transparente, alto mínimo 120 px. Si no carga, la página y el PDF caen al texto y no se rompe nada.
