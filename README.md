@@ -70,6 +70,20 @@ Catorce campos por cada solicitud: institución, tipo de entidad, nombre, correo
 
 En el momento en que la persona se identifica, **no** al descargar el PDF. Si llena el formulario y luego cierra la pestaña sin descargar nada, el prospecto ya quedó registrado.
 
+#### Ruta C: la araña de Clientify
+
+Clientify tiene una herramienta llamada **arañas** que sirve justo para esto: conectar un formulario que ya existe en una web propia. No hay que cambiar el cotizador, salvo pegarle el código de seguimiento.
+
+1. En Clientify, copiar el **código de seguimiento** (Analytics) de la cuenta.
+2. Pegarlo en `index.html`, en el hueco marcado `<!-- INICIO CÓDIGO CLIENTIFY -->`, justo antes de `</body>`.
+3. Publicar el cotizador y en Clientify crear una **araña** apuntando a su dirección.
+4. Como disparador, elegir el clic en el botón que envía el formulario.
+5. Emparejar los campos. El formulario del cotizador ya expone estos `name`, y los últimos nueve son ocultos pero legibles para la araña:
+
+`institucion`, `tipo_entidad`, `nombre`, `email`, `telefono`, `personas`, `tramo`, `descuento`, `subtotal`, `iva`, `total`, `folio`, `detalle`, `origen`
+
+Requisito de la araña: el formulario debe tener al menos un campo de email, y lo tiene.
+
 #### Respaldo con Formulario de Google, paso a paso
 
 1. Crear un formulario nuevo en Google Forms con una pregunta de respuesta corta por cada dato.
@@ -249,6 +263,21 @@ Como el descuento salta de golpe, hay puntos donde cubrir a una persona más sal
 - Bloque **Qué incluye tu contratación**: responsable asignado, seguimiento de avance mensual o quincenal, fechas de apertura y cierre, y constancias en paquete auditable. Aparece también en el PDF.
 - Bloque de **capacitación personalizada** destacado justo debajo de la cotización, con botón a WhatsApp y a correo. Además aparece un aviso dentro del resultado cuando alguien captura 40 personas o más.
 - **PDF con folio**, vigencia de 30 días, desglose de IVA, precio de lista tachado donde hubo descuento, recuadro de capacitación personalizada, bloque de *Siguiente paso* con folio y contactos, y las condiciones comerciales.
+- **Segundo PDF sin costo: la guía para armar el programa anual.** Cuatro páginas con los seis pasos, el mapa de niveles (con los números que esa persona capturó), el checklist de evidencias del expediente y los cinco errores más comunes. Se ofrece en la confirmación, después de descargar la cotización, con un botón aparte. Tiene valor por sí sola, así que se comparte hacia adentro de la institución y llega a quien autoriza.
+
+### El orden de la página, y por qué
+
+La página está armada como embudo: primero lo que queremos que sepan, la calculadora después.
+
+1. Promesa y sellos de confianza.
+2. **Por qué la capacitación no es la misma para todos** — tres tarjetas.
+3. **Lo que estás contratando** — las seis cosas que van incluidas, más el aviso de la guía de regalo.
+4. Paso 1: la calculadora.
+5. Paso 2: el resultado (o la cortina, según `momentoDatos`).
+6. Capacitación a la medida.
+7. Contacto.
+
+Para no castigar a quien llega decidido, el encabezado tiene un enlace **"Ya sé lo que necesito, llévame a la cotización"** que salta directo al Paso 1. Es importante conservarlo: sin él, el visitante de alta intención tiene que leer dos pantallas que no pidió.
 
 ### Cómo puede contactarnos el visitante
 
