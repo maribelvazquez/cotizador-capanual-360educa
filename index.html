@@ -163,6 +163,13 @@ table.lines td.dsc{color:var(--ok);font-weight:800}
 /* ── Empezar de nuevo ── */
 /* ── Fotos reales. Todas son opcionales: si el archivo no está en assets/,
       la imagen se oculta sola y la página se ve bien igual. ── */
+.credenciales{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--linea);
+  border:1px solid var(--linea);border-radius:13px;overflow:hidden;margin-top:18px}
+.credenciales div{background:var(--card);padding:15px 12px;text-align:center}
+.credenciales .c-dato{font-size:1.35rem;font-weight:800;color:var(--naranja-d);line-height:1.15}
+.credenciales .c-etq{font-size:.76rem;color:var(--muted);line-height:1.35;margin-top:4px}
+@media(max-width:700px){ .credenciales{grid-template-columns:1fr 1fr} }
+
 .persona{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .persona img{width:88px;height:88px;border-radius:14px;object-fit:cover;flex:0 0 88px;
   border:3px solid #fff;box-shadow:0 3px 12px rgba(27,27,30,.14)}
@@ -371,6 +378,8 @@ footer b{color:var(--ink)}
       </div>
     </div>
 
+    <div class="credenciales" id="credenciales" hidden></div>
+
     <img class="foto-banda" id="foto-equipo" alt="" hidden>
 
     <div class="regalo">
@@ -501,6 +510,11 @@ footer b{color:var(--ink)}
       <div class="err" id="e-mail">Revisa el formato del correo.</div>
     </div>
     <div class="f">
+      <label for="i-inicio">¿Cuándo planean empezar?</label>
+      <select id="i-inicio" name="inicio"></select>
+      <div class="err" id="e-inicio">Elige un mes para armar tu calendario.</div>
+    </div>
+    <div class="f">
       <label for="i-tel">Teléfono o WhatsApp</label>
       <input id="i-tel" name="telefono" type="tel" autocomplete="tel" inputmode="tel" placeholder="Por si necesitas que te ayudemos a ajustarla">
       <div class="err" id="e-tel">Necesitamos 10 dígitos.</div>
@@ -519,6 +533,7 @@ footer b{color:var(--ink)}
     <input type="hidden" id="h-folio"     name="folio">
     <input type="hidden" id="h-detalle"   name="detalle">
     <input type="hidden" id="h-origen"    name="origen">
+    <input type="hidden" id="h-inicio"    name="inicio">
 
     <div class="priv" id="priv-txt"></div>
 
@@ -955,6 +970,18 @@ const CONFIG = {
      la imagen se oculta sola y la página se ve bien igual.
      Van fotos reales del equipo y del claustro, nunca banco de
      imágenes: este público reconoce el stock y le resta credibilidad.  */
+  /* ── PRUEBA DE EXPERIENCIA ────────────────────────────────
+     Se muestra una franja con estos datos arriba de la calculadora.
+     Si se dejan vacíos, la franja no aparece. NO poner cifras que no
+     se puedan sostener: frente a este público un dato flojo cuesta
+     más que el presupuesto del mes.                              */
+  credenciales: [
+    // { dato: '+12', etiqueta: 'años capacitando al sector financiero' },
+    // { dato: '+8,000', etiqueta: 'personas capacitadas' },
+    // { dato: '+150', etiqueta: 'instituciones atendidas' },
+    // { dato: '100%', etiqueta: 'del claustro con certificación vigente' }
+  ],
+
   fotos: {
     // Quien atiende. Aparece al final, junto a "¿Prefieres que lo veamos juntos?"
     asesor:       'assets/asesor.jpg',
@@ -1017,7 +1044,8 @@ const CONFIG = {
     institucion:'institucion', tipo_entidad:'tipo_entidad', nombre:'nombre',
     correo:'email', telefono:'telefono', personas:'personas',
     tramo:'tramo', descuento:'descuento', subtotal:'subtotal',
-    iva:'iva', total:'total', folio:'folio', detalle:'detalle', origen:'origen'
+    iva:'iva', total:'total', folio:'folio', detalle:'detalle', origen:'origen',
+    inicio:'inicio'
   },
 
   /* ── CUÁNDO SE PIDEN LOS DATOS DE CONTACTO ─────────────────
@@ -1118,6 +1146,34 @@ let logoListo=false, logoData=null, logoDim=null;
       .then(b=>new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(b);}))
       .then(d=>{logoData=d;}).catch(()=>{logoData=null;});
   }
+  /* Meses que quedan del ciclo. La fecha de arranque es lo que permite
+     armarle el calendario en la guía: sin ella, la guía es genérica. */
+  (function meses(){
+    const M = ['enero','febrero','marzo','abril','mayo','junio','julio',
+               'agosto','septiembre','octubre','noviembre','diciembre'];
+    const hoy = new Date(), sel = $('i-inicio');
+    let html = '<option value="">Selecciona…</option>';
+    const anio = hoy.getFullYear();
+    for (let m = hoy.getMonth(); m < 12; m++){
+      const etq = M[m].charAt(0).toUpperCase() + M[m].slice(1);
+      html += '<option value="' + m + '">' + etq + ' ' + anio +
+              (m === hoy.getMonth() ? ' · este mes' : '') + '</option>';
+    }
+    html += '<option value="-1">Todavía no lo decidimos</option>';
+    sel.innerHTML = html;
+  })();
+
+  /* Franja de experiencia. Si no hay credenciales cargadas, no se pinta:
+     mejor sin franja que con un número que no se pueda sostener. */
+  (function credenciales(){
+    const C = CONFIG.credenciales || [];
+    if (!C.length) return;
+    $('credenciales').innerHTML = C.map(c =>
+      `<div><div class="c-dato">${c.dato}</div><div class="c-etq">${c.etiqueta}</div></div>`).join('');
+    $('credenciales').style.gridTemplateColumns = 'repeat(' + Math.min(C.length,4) + ',1fr)';
+    $('credenciales').hidden = false;
+  })();
+
   /* Cada foto se intenta cargar; si no existe, se queda oculta y ya. */
   (function fotos(){
     const F = CONFIG.fotos || {};
@@ -1436,7 +1492,8 @@ function limpiarTodo(){
   $('listo').innerHTML = '';
   ['i-inst','i-name','i-mail','i-tel'].forEach(id => { $(id).value=''; $(id).classList.remove('bad'); });
   $('i-tipo').value = '';
-  ['e-inst','e-tipo','e-name','e-mail','e-tel'].forEach(id => $(id).classList.remove('show'));
+  $('i-inicio').value = '';
+  ['e-inst','e-tipo','e-name','e-mail','e-tel','e-inicio'].forEach(id => $(id).classList.remove('show'));
   render();
   window.scrollTo({ top: document.getElementById('calculadora').offsetTop - 20, behavior:'smooth' });
 }
@@ -1460,6 +1517,7 @@ function validar(){
     ['i-tipo','e-tipo', v=>v!==''],
     ['i-name','e-name', v=>v.trim().length>=3],
     ['i-mail','e-mail', v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())],
+    ['i-inicio','e-inicio', v=>v!==''],
     ['i-tel','e-tel',   v=>v.replace(/\D/g,'').length>=10]
   ];
   let ok=true, primero=null;
@@ -1512,6 +1570,7 @@ function enviarProspecto(datos, r){
   v[C.folio]        = datos.folio;
   v[C.detalle]      = r.lineas.map(l => l.qty + ' x ' + l.course).join(' | ');
   v[C.origen]       = 'Cotizador capacitación anual ' + CONFIG.ciclo;
+  if (C.inicio) v[C.inicio] = datos.inicioTexto || '';
 
   /* Destino principal: el CRM */
   if (CONFIG.clientify) postar(CONFIG.clientify, CONFIG.clientifyFormato, v);
@@ -1539,7 +1598,10 @@ $('b-go').addEventListener('click', () => {
   cliente = {
     inst:$('i-inst').value.trim(), tipo:$('i-tipo').value,
     name:$('i-name').value.trim(), mail:$('i-mail').value.trim(),
-    tel:$('i-tel').value.trim(), folio: (cliente && cliente.folio) || folio()
+    tel:$('i-tel').value.trim(),
+    inicio: parseInt($('i-inicio').value, 10),
+    inicioTexto: $('i-inicio').selectedOptions[0] ? $('i-inicio').selectedOptions[0].textContent.replace(' · este mes','') : '',
+    folio: (cliente && cliente.folio) || folio()
   };
   /* Los campos ocultos se llenan aquí, antes de cualquier envío: una araña
      de Clientify lee el formulario en el momento del clic, así que lo que no
@@ -1553,6 +1615,7 @@ $('b-go').addEventListener('click', () => {
   $('h-folio').value     = cliente.folio;
   $('h-detalle').value   = r.lineas.map(l => l.qty + ' x ' + l.course).join(' | ');
   $('h-origen').value    = 'Cotizador capacitación anual ' + CONFIG.ciclo;
+  $('h-inicio').value    = cliente.inicioTexto || '';
 
   /* El prospecto se registra AQUÍ, en el momento en que se identifica,
      no al descargar. Así queda en la base aunque después no descargue. */
@@ -1704,12 +1767,53 @@ const pdfSafe = t => String(t)
 
 
 /* ══════════════════════════════════════════════════════════════
-   GUÍA PARA ARMAR EL PROGRAMA ANUAL
+   GUÍA: EL BORRADOR DEL PROGRAMA ANUAL
    Segundo PDF, sin costo, que se descarga junto con la cotización.
-   Tiene valor por sí solo: son los pasos que el oficial de
-   cumplimiento tiene que dar de todos modos, con o sin nosotros.
-   Por eso funciona como imán y por eso se puede compartir.
+   No es un folleto: es el esqueleto del documento que el Oficial de
+   Cumplimiento tiene que elaborar de todos modos, ya con sus números
+   y con su calendario. Por eso se comparte hacia adentro y llega a
+   quien autoriza el gasto.
+   Fuente normativa: Guía para el desarrollo del Programa Anual de
+   Capacitación y Difusión en materia de PLD/FT, CNBV, abril de 2020.
    ══════════════════════════════════════════════════════════════ */
+
+/* Horas anuales de referencia de la tabla IV.5 de la Guía de la CNBV. */
+const HORAS_CNBV = [
+  ['Consejo de Administración', 20],
+  ['Alta dirección', 30],
+  ['Personal de primer contacto con el Cliente o Usuario', 20],
+  ['Auditor interno', 30],
+  ['Oficial de Cumplimiento, Representante y/o Comité', 40]
+];
+
+/* A qué referencia de horas corresponde cada nivel del catálogo. */
+const REF_HORAS = {
+  ind: { rol: 'Personal de nuevo ingreso',  horas: null },
+  bie: { rol: 'Primer contacto con cliente', horas: 20 },
+  gen: { rol: 'Primer contacto con cliente', horas: 20 },
+  dir: { rol: 'Consejo y alta dirección',    horas: 30 },
+  esp: { rol: 'Cumplimiento, Comité y auditoría', horas: 40 }
+};
+
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio',
+               'agosto','septiembre','octubre','noviembre','diciembre'];
+
+/* Doce temas de difusión, tomados del temario mínimo de la Guía. */
+const TEMAS_DIFUSION = [
+  ['Evaluación Nacional de Riesgos y riesgos propios de la entidad', 'Correo con resumen ejecutivo'],
+  ['Listas de personas bloqueadas y medidas de congelamiento', 'Cápsula en intranet'],
+  ['Identificación del Propietario Real', 'Webinar o sesión corta'],
+  ['Conocimiento del cliente y expediente de identificación', 'Correo con caso práctico'],
+  ['Señales de alerta y monitoreo transaccional', 'Cápsula en intranet'],
+  ['Tipologías recientes de la UIF', 'Webinar'],
+  ['Personas Políticamente Expuestas', 'Correo con caso práctico'],
+  ['Operaciones inusuales, internas preocupantes y relevantes', 'Sesión corta por área'],
+  ['Sistemas automatizados: funciones y alertas', 'Cápsula en intranet'],
+  ['Penas y consecuencias del incumplimiento', 'Correo institucional'],
+  ['Estructuras internas: Comité y Oficial de Cumplimiento', 'Cápsula en intranet'],
+  ['Riesgos emergentes: operaciones no presenciales y activos virtuales', 'Webinar']
+];
+
 function generarGuia(datos, r){
   if(!window.jspdf){ alert('No se pudo generar la guía. Inténtalo de nuevo.'); return; }
   const { jsPDF } = window.jspdf;
@@ -1719,13 +1823,73 @@ function generarGuia(datos, r){
         CORAL=[255,131,97], VERDE=[61,158,99];
   let y=0;
 
-  const nuevaPagina = () => { doc.addPage(); y=64; };
-  const sitio = (alto) => { if (y + alto > 700) nuevaPagina(); };
+  const nueva = () => { doc.addPage(); y=64; };
+  const sitio = alto => { if (y + alto > 700) nueva(); };
 
-  /* ── Portada ── */
+  function H(t, sub, color){
+    sitio(70);
+    doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(...INK);
+    doc.text(pdfSafe(t), M, y); y+=10;
+    doc.setDrawColor(...(color||NAR)); doc.setLineWidth(2); doc.line(M,y,M+44,y); y+=22;
+    if (sub){
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(57,62,65);
+      const l = doc.splitTextToSize(pdfSafe(sub), ANCHO);
+      doc.text(l, M, y); y += l.length*11.5 + 12;
+    }
+  }
+  function P(t, size){
+    doc.setFont('helvetica','normal'); doc.setFontSize(size||9); doc.setTextColor(57,62,65);
+    const l = doc.splitTextToSize(pdfSafe(t), ANCHO);
+    sitio(l.length*11.5 + 8);
+    doc.text(l, M, y); y += l.length*11.5 + 10;
+  }
+  function nota(titulo, texto, color){
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+    const l = doc.splitTextToSize(pdfSafe(texto), ANCHO-30);
+    const alto = 20 + l.length*10.5 + 12;
+    sitio(alto);
+    doc.setFillColor(246,241,251); doc.rect(M,y,ANCHO,alto,'F');
+    doc.setFillColor(...(color||NAR)); doc.rect(M,y,3,alto,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...INK);
+    doc.text(pdfSafe(titulo), M+14, y+16);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(57,62,65);
+    doc.text(l, M+14, y+30);
+    y += alto + 14;
+  }
+  function tabla(cabeceras, anchos, filas, alturaMin){
+    doc.setFillColor(...INK); doc.rect(M,y,ANCHO,20,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(255,255,255);
+    let cx=M+9;
+    cabeceras.forEach((h,i)=>{ doc.text(pdfSafe(h), cx, y+13); cx += anchos[i]; });
+    y += 20;
+    filas.forEach((f,i)=>{
+      doc.setFont('helvetica','normal'); doc.setFontSize(8);
+      let alto = alturaMin || 22;
+      const partes = f.map((c,j)=> doc.splitTextToSize(pdfSafe(String(c)).replace(/^\*\*/,''), anchos[j]-12));
+      alto = Math.max(alto, 12 + Math.max.apply(null, partes.map(p=>p.length))*10);
+      if (y + alto > 700){ nueva();
+        doc.setFillColor(...INK); doc.rect(M,y,ANCHO,20,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(255,255,255);
+        let bx=M+9; cabeceras.forEach((h,k)=>{ doc.text(pdfSafe(h), bx, y+13); bx += anchos[k]; });
+        y += 20;
+      }
+      if(i%2===0){ doc.setFillColor(250,248,252); doc.rect(M,y,ANCHO,alto,'F'); }
+      doc.setDrawColor(...LIN); doc.setLineWidth(.5); doc.line(M,y+alto,W-M,y+alto);
+      let x=M+9;
+      partes.forEach((pt,j)=>{
+        const negrita = String(f[j]).indexOf('**')===0;
+        doc.setFont('helvetica', negrita?'bold':'normal'); doc.setFontSize(8);
+        doc.setTextColor(negrita?INK[0]:57, negrita?INK[1]:62, negrita?INK[2]:65);
+        doc.text(pt, x, y+13); x += anchos[j];
+      });
+      y += alto;
+    });
+    y += 16;
+  }
+
+  /* ── PORTADA ── */
   doc.setFillColor(...INK); doc.rect(0,0,W,300,'F');
   doc.setFillColor(...NAR); doc.rect(0,300,W,5,'F');
-
   let logoPuesto=false;
   if(logoDim){
     const hMax=32, wMax=155;
@@ -1741,204 +1905,245 @@ function generarGuia(datos, r){
     doc.setTextColor(135,216,149); doc.setFont('helvetica','bold'); doc.setFontSize(15);
     doc.text('360EDUCA', M, 62);
   }
-
   doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(135,216,149);
-  doc.text('GUÍA PRÁCTICA · SIN COSTO', M, 136);
-  doc.setFont('helvetica','bold'); doc.setFontSize(26); doc.setTextColor(255,255,255);
-  doc.text(doc.splitTextToSize(pdfSafe('Cómo armar tu programa anual de capacitación en PLD/FT'), ANCHO-40), M, 168);
+  doc.text('BORRADOR DE TRABAJO · SIN COSTO', M, 132);
+  doc.setFont('helvetica','bold'); doc.setFontSize(25); doc.setTextColor(255,255,255);
+  doc.text(doc.splitTextToSize(pdfSafe('Tu Programa Anual de Capacitación y Difusión en PLD/FT ' + CONFIG.ciclo), ANCHO-40), M, 164);
   doc.setFont('helvetica','normal'); doc.setFontSize(10.5); doc.setTextColor(200,194,212);
   doc.text(doc.splitTextToSize(pdfSafe(
-    'Seis pasos, el checklist de evidencias para tu expediente y los errores que más se repiten. Para entidades del sector financiero · Ciclo ' + CONFIG.ciclo,
-    ANCHO-60)), M, 236);
+    'Estructurado conforme a la Guía de la CNBV de abril de 2020, con los perfiles y el calendario de tu institución.'), ANCHO-70), M, 238);
 
   y=340;
   if (datos && datos.inst){
-    doc.setFillColor(246,241,251); doc.rect(M,y,ANCHO,54,'F');
-    doc.setFillColor(...NAR); doc.rect(M,y,3,54,'F');
+    doc.setFillColor(246,241,251); doc.rect(M,y,ANCHO,58,'F');
+    doc.setFillColor(...NAR); doc.rect(M,y,3,58,'F');
     doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...NAR);
-    doc.text('PREPARADA PARA', M+14, y+19);
+    doc.text('PREPARADO PARA', M+14, y+19);
     doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...INK);
     doc.text(pdfSafe(datos.inst), M+14, y+35);
     doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...MUT);
-    doc.text(pdfSafe('At\'n: ' + datos.name + '   ·   Acompaña a la cotización ' + datos.folio), M+14, y+47);
-    y += 54 + 26;
+    doc.text(pdfSafe('At\'n: ' + datos.name + '   ·   Acompaña a la cotización ' + datos.folio +
+      (datos.inicioTexto ? '   ·   Arranque previsto: ' + datos.inicioTexto : '')), M+14, y+49);
+    y += 58 + 26;
   }
+  P('El programa anual no es la lista de cursos que se compraron. Es el documento que explica a quién se capacitó, en qué, por qué le tocaba eso, con qué frecuencia y con qué se puede demostrar. Lo elabora el Oficial de Cumplimiento y se somete a la aprobación del Comité.', 10);
+  P('Este borrador sigue la estructura que sugiere la Guía de la CNBV y ya viene con los perfiles y las cantidades que capturaste. Lo que falta ponerle es lo que solo tú conoces: los resultados de tu metodología de evaluación de riesgos, tus productos y tus casos.', 10);
 
-  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(57,62,65);
-  doc.text(doc.splitTextToSize(pdfSafe(
-    'El programa anual de capacitación no es la lista de cursos que se compraron. Es el documento que explica a quién se capacitó, en qué, por qué le tocaba eso y con qué se puede demostrar. Se arma una vez al año y se sostiene con evidencia.\n\n' +
-    'Esta guía es la secuencia práctica para armarlo. Sirva o no sirva contratar con nosotros, los seis pasos son los mismos.',
-    ANCHO)), M, y);
+  /* ── 1. LO QUE PIDE LA GUÍA ── */
+  nueva();
+  H('1. Lo que pide la Guía de la CNBV',
+    'La Comisión publicó en abril de 2020 la Guía para el desarrollo del Programa Anual de Capacitación y Difusión en materia de PLD/FT. La propia Guía aclara que no es vinculante y que su grado de adopción no será objeto de supervisión, pero es la referencia con la que se construye un programa que se sostiene en una revisión.');
 
-  /* ── Los seis pasos ── */
-  nuevaPagina();
-  doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(...INK);
-  doc.text('Los seis pasos', M, y); y+=10;
-  doc.setDrawColor(...NAR); doc.setLineWidth(2); doc.line(M,y,M+44,y); y+=26;
+  P('Para cada curso, el programa debe describir:');
+  tabla(['ELEMENTO','QUÉ SE DOCUMENTA'], [150, ANCHO-150], [
+    ['Nombre del curso', 'La denominación con la que se identifica la actividad.'],
+    ['Horas mínimas', 'Duración de la capacitación.'],
+    ['Objetivo', 'Qué se espera que la persona sepa hacer al terminar.'],
+    ['Temas a cubrir', 'El temario, ajustado a los productos, clientes y riesgos de la entidad.'],
+    ['Personal al que va dirigido', 'Áreas, niveles y puestos.'],
+    ['Vinculación', 'Si está ligado con un programa de capacitación previo o posterior.']
+  ]);
+  P('Y para la difusión, los medios o canales por los que se va a realizar.');
 
-  const pasos = [
-    ['Censa la plantilla por función, no por área',
-     'El censo por organigrama no sirve: lo que define el nivel es qué hace la persona, no dónde está sentada. Cuenta cuántos entraron este año, cuántos tratan con clientes o promueven producto, cuántos son el grueso de la operación, cuántos deciden y cuántos responden ante la autoridad. Una persona cuenta una sola vez, en la función que le corresponde.'],
-    ['Asigna a cada grupo lo que le toca',
-     'Aquí es donde se cae la mayoría de los programas: el mismo contenido para todos. Un expediente con constancias idénticas para funciones distintas es lo primero que se nota en una revisión. La tabla de la página siguiente es el mapa de referencia.'],
-    ['Ponle fechas de apertura y de cierre',
-     'Un programa sin calendario no se cumple. Define cuándo abre, cuándo cierra y con cuánto margen antes del 31 de diciembre. La constancia se emite cuando la persona termina, así que conviene dejar al menos seis semanas de colchón.'],
-    ['Comunícalo por dentro y dale seguimiento',
-     'Avisa quién tiene que cursar qué y por qué, con el respaldo de dirección. Después revisa el avance con corte quincenal o mensual: quién terminó, quién va a medias, quién no ha entrado. El seguimiento es lo que separa un programa que se cumple de uno que se compró.'],
-    ['Reúne la evidencia mientras avanza, no en diciembre',
-     'Constancia por persona con nombre, temario y horas; registro de avance; el propio programa anual firmado. Guardarlo al final significa perseguir papeles en el peor mes del año.'],
-    ['Deja resuelto el mecanismo para nuevos ingresos',
-     'La capacitación de quien entra a media rotación no espera al ciclo. Define quién avisa cuando hay una contratación y cómo se le da de alta, para que no aparezcan huecos en el expediente en enero.'],
-  ];
+  nota('El punto que más se pasa por alto',
+    'La capacitación debe impartirse al menos una vez al año, pero la Guía sugiere que el contenido del programa se distribuya durante todo el año, no que se concentre en una sola sesión. Un programa de doce meses de actividad se defiende mucho mejor que uno de un solo día.');
 
-  pasos.forEach((paso, i) => {
-    doc.setFont('helvetica','normal'); doc.setFontSize(9);
-    const cuerpo = doc.splitTextToSize(pdfSafe(paso[1]), ANCHO-34);
-    const alto = 22 + cuerpo.length*11.5 + 14;
-    sitio(alto);
-    doc.setFillColor(...NAR); doc.circle(M+9, y-2, 9, 'F');
-    doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(255,255,255);
-    doc.text(String(i+1), M+9, y+1.5, {align:'center'});
-    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...INK);
-    doc.text(pdfSafe(paso[0]), M+26, y+2);
-    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(57,62,65);
-    doc.text(cuerpo, M+26, y+19);
-    y += alto;
-  });
+  H('Horas anuales que sugiere la Guía', null, CORAL);
+  P('Son de referencia, no obligatorias. Sirven para dimensionar el programa y para explicar por qué a unos perfiles les toca más que a otros.');
+  tabla(['CARGO O FUNCIÓN','HORAS ANUALES SUGERIDAS'],[ANCHO-150,150],
+    HORAS_CNBV.map(h => [h[0], String(h[1]) + ' horas']));
 
-  /* ── El mapa de niveles ── */
-  nuevaPagina();
-  doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(...INK);
-  doc.text('El mapa: qué le toca a cada quien', M, y); y+=10;
-  doc.setDrawColor(...NAR); doc.setLineWidth(2); doc.line(M,y,M+44,y); y+=22;
+  /* ── 2. TU PROGRAMA ── */
+  nueva();
+  H('2. Tu programa, con tus números',
+    'Cada colaborador cursa un solo nivel: el que corresponde a su función. La última columna compara las horas del curso contra las horas de referencia de la Guía, para que sepas cuánto te falta cubrir con difusión durante el año.');
 
-  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(57,62,65);
-  doc.text(doc.splitTextToSize(pdfSafe('Cada colaborador cursa uno solo: el que corresponde a su función. Lo que cambia entre perfiles es el contenido y las horas, no la cantidad de cursos.'), ANCHO), M, y);
-  y += 30;
-
-  const anchos = [176, 196, 44, 92];
-  doc.setFillColor(...INK); doc.rect(M,y,ANCHO,22,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(255,255,255);
-  let cx=M+10;
-  ['PERFIL DE LA PLANTILLA','NIVEL QUE LE CORRESPONDE','HORAS','TU PLANTILLA'].forEach((h,i)=>{
-    doc.text(h, i>=2 ? cx+anchos[i]-10 : cx, y+14, i>=2?{align:'right'}:{});
-    cx += anchos[i];
-  });
-  y += 22;
-
-  NIVELES.forEach((n, i) => {
+  const filasProg = NIVELES.map(n => {
     const linea = r ? r.lineas.find(l => l.id === n.id) : null;
-    const alto = 34;
-    if(i%2===0){ doc.setFillColor(250,248,252); doc.rect(M,y,ANCHO,alto,'F'); }
-    doc.setDrawColor(...LIN); doc.setLineWidth(.5); doc.line(M,y+alto,W-M,y+alto);
-    let x=M+10;
-    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(...INK);
-    doc.text(doc.splitTextToSize(pdfSafe(n.who), anchos[0]-14), x, y+14);
-    x += anchos[0];
-    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(57,62,65);
-    doc.text(doc.splitTextToSize(pdfSafe(n.course.replace('Capacitación Anual │ ','').replace('Curso de ','')), anchos[1]-14), x, y+13);
-    x += anchos[1];
-    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...MUT);
-    doc.text(n.h, x+anchos[2]-10, y+14, {align:'right'});
-    x += anchos[2];
-    if (linea){
-      doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...VERDE);
-      doc.text(String(linea.qty) + (linea.qty===1?' persona':' personas'), x+anchos[3]-10, y+14, {align:'right'});
-    } else {
-      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(190,185,200);
-      doc.text('—', x+anchos[3]-10, y+14, {align:'right'});
+    const ref = REF_HORAS[n.id] || {};
+    const hCurso = parseInt(n.h, 10) || 0;
+    let dif = '—';
+    if (ref.horas){
+      const falta = ref.horas - hCurso;
+      dif = falta > 0 ? falta + ' h con difusión' : 'Cubierto';
     }
-    y += alto;
+    return [
+      (linea ? '**' : '') + n.who,
+      n.course.replace('Capacitación Anual │ ','').replace('Curso de ','').replace(' ' + CONFIG.ciclo,''),
+      n.h,
+      linea ? String(linea.qty) : '—',
+      ref.horas ? ref.horas + ' h' : '—',
+      dif
+    ];
   });
+  tabla(['PERFIL','NIVEL','CURSO','PERSONAS','REF. GUÍA','DIFERENCIA'],
+        [122, 128, 42, 58, 54, ANCHO-404], filasProg);
+
+  nota('Cómo se lee esta tabla',
+    'El curso anual es la columna vertebral del programa y es lo que deja constancia con nombre, temario y horas. Las horas que faltan para llegar a la referencia de la Guía se cubren con el programa de difusión de la página siguiente: cápsulas, correos, webinars y sesiones cortas a lo largo del año. Las dos cosas juntas son el programa; ninguna sola lo es.', VERDE);
 
   if (r && r.personas){
-    y += 16;
-    doc.setFillColor(238,249,241); doc.rect(M,y,ANCHO,40,'F');
-    doc.setFillColor(...VERDE); doc.rect(M,y,3,40,'F');
-    doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(22,64,40);
-    doc.text(pdfSafe('Tu programa cubre a ' + r.personas + (r.personas===1?' persona':' personas') + ' en ' + r.lineas.length + (r.lineas.length===1?' nivel.':' niveles.')), M+14, y+17);
-    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(31,86,56);
-    doc.text(pdfSafe('El desglose con precios y el total están en tu cotización ' + (datos && datos.folio ? datos.folio : '') + '.'), M+14, y+31);
-    y += 40;
+    P('Tu programa cubre a ' + r.personas + (r.personas===1?' persona':' personas') + ' en ' +
+      r.lineas.length + (r.lineas.length===1?' nivel':' niveles') +
+      '. El desglose con precios y el total están en tu cotización' +
+      (datos && datos.folio ? ' ' + datos.folio : '') + '.', 9.5);
+  }
+  P('Falta que le agregues, para cada curso, el objetivo en tus palabras y la vinculación con los riesgos que arrojó tu metodología de evaluación. Eso es lo que convierte un programa comprado en un programa propio.');
+
+  /* ── 3. CALENDARIO ── */
+  nueva();
+  const mesInicio = (datos && typeof datos.inicio === 'number' && datos.inicio >= 0)
+    ? datos.inicio : new Date().getMonth();
+  const restantes = 12 - mesInicio;
+
+  H('3. Tu calendario, mes por mes',
+    'Armado desde ' + (datos && datos.inicioTexto && datos.inicio >= 0
+      ? datos.inicioTexto.toLowerCase()
+      : 'este mes') + ' hasta el cierre del ciclo, el 31 de diciembre. Quedan ' +
+      restantes + (restantes===1 ? ' mes.' : ' meses.'));
+
+  const filasCal = [];
+  for (let i = 0; i < restantes; i++){
+    const m = mesInicio + i;
+    const nombre = MESES[m].charAt(0).toUpperCase() + MESES[m].slice(1);
+    const tema = TEMAS_DIFUSION[i % TEMAS_DIFUSION.length];
+    let accion;
+    if (i === 0){
+      accion = 'Presentar el programa al Comité para su aprobación. Dar de alta al personal en la plataforma y comunicar por dentro quién cursa qué y por qué.';
+    } else if (i === 1 && restantes > 3){
+      accion = 'Arranque de los cursos de la plantilla general y del área comercial. Primer corte de avance al final del mes.';
+    } else if (i === 2 && restantes > 4){
+      accion = 'Cursos de Alta Dirección y del área de cumplimiento. Recordatorio a quien no ha entrado.';
+    } else if (i === restantes - 1){
+      accion = 'Cierre del ciclo: últimas evaluaciones, emisión de constancias e integración del expediente completo.';
+    } else if (i === restantes - 2){
+      accion = 'Corte de avance y seguimiento individual a quien va pendiente. Es el mes que decide si se llega completo.';
+    } else {
+      accion = 'Seguimiento del avance y atención a nuevos ingresos del mes.';
+    }
+    filasCal.push([(i===0||i===restantes-1?'**':'') + nombre, accion, tema[0]]);
+  }
+  tabla(['MES','CAPACITACIÓN Y SEGUIMIENTO','TEMA DE DIFUSIÓN'],
+        [72, 250, ANCHO-322], filasCal);
+
+  if (restantes <= 3){
+    nota('Vas con el tiempo justo',
+      'Quedan ' + restantes + (restantes===1?' mes':' meses') + ' de ciclo. La constancia se emite cuando la persona termina el curso, así que conviene dar de alta al personal cuanto antes y no dejar el arranque para el último mes. Si el tiempo ya no alcanza para el programa completo, es preferible cubrir lo esencial y dejarlo documentado, que llegar a diciembre sin nada.', CORAL);
+  } else {
+    nota('El error de calendario más caro',
+      'Arrancar en noviembre. La constancia se emite al terminar y la gente avanza a su ritmo, así que sin margen se llega a diciembre con personal a medias y sin papel que acredite nada. Seis semanas antes del cierre es el mínimo razonable.', CORAL);
   }
 
-  /* ── Errores comunes ── */
-  y += 24;
-  sitio(230);
-  doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(...INK);
-  doc.text('Los cinco errores que más se repiten', M, y); y+=10;
-  doc.setDrawColor(...CORAL); doc.setLineWidth(2); doc.line(M,y,M+44,y); y+=24;
+  /* ── 4. DIFUSIÓN ── */
+  nueva();
+  H('4. El programa de difusión',
+    'Es la mitad del programa que casi nadie documenta, y es la que cubre las horas que el curso anual no alcanza. La Guía la trata como un apartado propio y pide dejar por escrito los medios o canales.');
 
-  const errores = [
-    ['El mismo contenido para toda la plantilla', 'Es el más común y el más visible. Cinco constancias idénticas para cinco funciones distintas se nota de inmediato.'],
-    ['Dejar fuera al consejo y a la dirección', 'Es el nivel que más se olvida y de los primeros que se preguntan.'],
-    ['Arrancar en noviembre', 'La constancia se emite al terminar. Sin margen, se llega a diciembre con gente a medias y sin papel.'],
-    ['Comprar y no dar seguimiento', 'Licencias vendidas que nadie cursó no dejan constancia y no acreditan nada.'],
-    ['Guardar la evidencia hasta el final', 'Reunir constancias de todo el año en diciembre es la forma más cara de hacerlo.'],
-  ];
+  P('Doce temas listos para calendarizar. Todos salen del temario mínimo que señala la Guía, así que cada publicación es evidencia de que el programa se cumplió durante el año.');
+  tabla(['TEMA','CANAL SUGERIDO'], [ANCHO-160, 160],
+        TEMAS_DIFUSION.map(t => [t[0], t[1]]));
 
-  errores.forEach((e, i) => {
+  nota('De dónde sacar el material sin producirlo tú',
+    'La Guía permite que el programa incluya capacitación impartida por instituciones educativas y profesionales de la materia. En la práctica eso significa que no tienes que escribir doce cápsulas: puedes apoyarte en material publicado y dejar constancia de la difusión. 360Educa publica análisis y webinars de forma continua, y con eso se alimenta buena parte del calendario de arriba.', VERDE);
+
+  P('Fuentes de apoyo:');
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...MUT);
+  [['Impacto360', 'publicación mensual de análisis y novedades del régimen preventivo'],
+   ['Webinars', 'sesiones en vivo sobre temas de coyuntura, con material descargable'],
+   ['Blog', 'gmc360.com.mx/blog'],
+   ['Canal de video', 'youtube.com/@gmc3609']].forEach(f => {
+    sitio(14);
+    doc.setFont('helvetica','bold'); doc.setTextColor(...NAR); doc.text(pdfSafe(f[0]), M, y);
+    doc.setFont('helvetica','normal'); doc.setTextColor(...MUT);
+    doc.text(pdfSafe('   ·   ' + f[1]), M + doc.getTextWidth(pdfSafe(f[0])), y);
+    y += 14;
+  });
+  y += 10;
+
+  nota('Qué documentar de cada difusión',
+    'Fecha, tema, canal utilizado, a quién se dirigió y el material o liga que se compartió. Con eso, doce correos al año se convierten en doce piezas de evidencia. Sin eso, no existieron.');
+
+  /* ── 5. EVALUACIÓN Y CONSTANCIAS ── */
+  nueva();
+  H('5. Evaluación, constancias y expediente',
+    'Es la parte que decide si el programa se puede acreditar o solo se puede contar.');
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...INK);
+  doc.text('Evaluación', M, y); y += 16;
+  P('La Guía pide establecer criterios de evaluación y documentar los resultados. La calificación puede ser numérica o simplemente aprobatoria o no aprobatoria: lo que no puede faltar es el criterio escrito y la evidencia del resultado.');
+  P('También hay que dejar asentado en el Manual de Cumplimiento —o en el documento que corresponda— qué se hace cuando alguien no aprueba: nueva evaluación, reforzamiento, y qué política aplica si reincide. Sin esa regla escrita, el primer reprobado se vuelve un problema improvisado.');
+
+  y += 6;
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...INK);
+  doc.text('Qué debe traer cada constancia', M, y); y += 16;
+  P('La Guía es específica y conviene revisarlo contra lo que hoy emite tu proveedor:');
+  [['Nombre completo del personal capacitado', 'sin abreviaturas'],
+   ['Cargo', 'del personal capacitado'],
+   ['Quién impartió', 'nombre, denominación o razón social'],
+   ['Fecha o periodo', 'en que se llevó a cabo'],
+   ['Horas totales', 'de duración'],
+   ['Resultado', 'de la evaluación o evaluaciones'],
+   ['Tipo de capacitación', 'presencial o en línea'],
+   ['Firma del instructor', 'nombre, firma y cargo, y en su caso el número de certificado vigente emitido por la Comisión']
+  ].forEach(c => {
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+    const anchoEtq = doc.getTextWidth(pdfSafe(c[0]) + '  ');
+    doc.setFont('helvetica','normal');
+    const l = doc.splitTextToSize(pdfSafe(c[1]), ANCHO - 22 - anchoEtq);
+    const alto = Math.max(16, l.length*10.5 + 6);
+    sitio(alto);
+    doc.setDrawColor(...NAR); doc.setLineWidth(1); doc.roundedRect(M, y-9, 10, 10, 2, 2, 'S');
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(...INK);
+    doc.text(pdfSafe(c[0]), M+20, y);
+    doc.setFont('helvetica','normal'); doc.setTextColor(...MUT);
+    doc.text(l, M + 20 + anchoEtq, y);
+    y += alto;
+  });
+  y += 12;
+
+  nota('Resguardo: cinco años',
+    'Toda la información y documentación generada por capacitación y difusión —materiales, evidencia de las evaluaciones y constancias emitidas— debe conservarse, física o digitalmente, al menos cinco años contados desde su elaboración. Conviene definir desde ahora dónde vive ese expediente y quién lo mantiene.');
+
+  /* ── 6. ERRORES Y CIERRE ── */
+  nueva();
+  H('6. Los cinco errores que más se repiten', null, CORAL);
+  [['El mismo contenido para toda la plantilla',
+    'La Guía plantea temarios distintos por cargo y función. Cinco constancias idénticas para cinco funciones distintas es lo primero que se nota.'],
+   ['Dejar fuera al consejo y a la alta dirección',
+    'Son los dos perfiles con más horas sugeridas después del área de cumplimiento, y los que más se olvidan.'],
+   ['Concentrar todo en una sola sesión anual',
+    'La Guía sugiere distribuir el contenido durante el año. Un programa de un día es difícil de defender como capacitación continua.'],
+   ['No documentar la difusión',
+    'Se hace, pero no se registra. Doce correos sin fecha, tema ni destinatario no son evidencia de nada.'],
+   ['Guardar la evidencia hasta diciembre',
+    'Reunir constancias de todo el año en el último mes es la forma más cara y más frágil de hacerlo.']
+  ].forEach((e,i)=>{
     doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
-    const cuerpo = doc.splitTextToSize(pdfSafe(e[1]), ANCHO-40);
-    const alto = 15 + cuerpo.length*10.5 + 10;
+    const l = doc.splitTextToSize(pdfSafe(e[1]), ANCHO-24);
+    const alto = 15 + l.length*10.5 + 10;
     sitio(alto);
     doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...CORAL);
-    doc.text(String(i+1) + '.', M, y);
+    doc.text(String(i+1)+'.', M, y);
     doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...INK);
     doc.text(pdfSafe(e[0]), M+20, y);
     doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...MUT);
-    doc.text(cuerpo, M+20, y+12);
+    doc.text(l, M+20, y+12);
     y += alto;
   });
 
-  /* ── Checklist de evidencias ── */
-  nuevaPagina();
-  doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(...INK);
-  doc.text('Checklist de evidencias del expediente', M, y); y+=10;
-  doc.setDrawColor(...NAR); doc.setLineWidth(2); doc.line(M,y,M+44,y); y+=22;
-
-  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(57,62,65);
-  doc.text(doc.splitTextToSize(pdfSafe('La capacitación termina cuando se puede demostrar. Esto es lo que conviene tener guardado y ordenado antes de que alguien lo pida.'), ANCHO), M, y);
-  y += 30;
-
-  const evidencias = [
-    ['Programa anual de capacitación', 'El documento en sí: alcance, perfiles, contenidos, calendario y responsable. Firmado.'],
-    ['Constancia por persona y por curso', 'Con nombre completo, nombre del curso, temario, horas y fecha. Es la evidencia principal.'],
-    ['Registro de avance', 'Quién terminó, quién no, y en qué fecha. Sirve para demostrar el seguimiento, no solo la compra.'],
-    ['Listado del personal cubierto', 'Con la función de cada quien y el nivel que le correspondió. Es lo que explica por qué a cada uno le tocó lo que le tocó.'],
-    ['Altas del año', 'Personal que entró a media rotación y qué se hizo con su capacitación.'],
-    ['Materiales del curso', 'Temario y materiales de apoyo, por si se pide acreditar el contenido.'],
-    ['Resguardo ordenado y localizable', 'Digital o físico, pero que se pueda encontrar sin buscar en tres lugares distintos.'],
-  ];
-
-  evidencias.forEach(ev => {
-    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
-    const cuerpo = doc.splitTextToSize(pdfSafe(ev[1]), ANCHO-40);
-    const alto = 16 + cuerpo.length*10.5 + 11;
-    sitio(alto);
-    doc.setDrawColor(...NAR); doc.setLineWidth(1);
-    doc.roundedRect(M, y-9, 11, 11, 2, 2, 'S');
-    doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...INK);
-    doc.text(pdfSafe(ev[0]), M+22, y);
-    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...MUT);
-    doc.text(cuerpo, M+22, y+13);
-    y += alto;
-  });
-
-  /* ── Cierre ── */
-  y += 16;
+  y += 14;
   sitio(120);
-  doc.setFillColor(...INK); doc.rect(M,y,ANCHO,96,'F');
-  doc.setFillColor(...CORAL); doc.rect(M,y,3,96,'F');
+  doc.setFillColor(...INK); doc.rect(M,y,ANCHO,100,'F');
+  doc.setFillColor(...CORAL); doc.rect(M,y,3,100,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(255,255,255);
-  doc.text('¿Te ayudamos a armarlo?', M+16, y+26);
+  doc.text('¿Lo terminamos contigo?', M+16, y+26);
   doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(200,194,212);
-  doc.text(doc.splitTextToSize(pdfSafe('Si prefieres no hacerlo desde cero, lo revisamos contigo: el censo por función, el mapa de niveles y el calendario. Sin compromiso y sin costo.'), ANCHO-40), M+16, y+45);
+  doc.text(doc.splitTextToSize(pdfSafe(
+    'Este borrador ya trae la estructura, tus perfiles y tu calendario. Lo que falta —el objetivo de cada curso, la vinculación con tu metodología de riesgos y el calendario de difusión firmado— lo revisamos contigo en una llamada. Sin costo y sin compromiso.'), ANCHO-40), M+16, y+45);
   doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(135,216,149);
-  doc.text(pdfSafe('WhatsApp ' + CONFIG.whatsappVisible + '   ·   ' + CONFIG.correo), M+16, y+80);
-  y += 96;
+  doc.text(pdfSafe('WhatsApp ' + CONFIG.whatsappVisible + '   ·   ' + CONFIG.correo), M+16, y+86);
 
-  /* ── Pie ── */
+  /* ── PIE ── */
   const tot = doc.internal.getNumberOfPages();
   for(let i=1;i<=tot;i++){
     doc.setPage(i);
@@ -1947,12 +2152,16 @@ function generarGuia(datos, r){
     doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...INK);
     doc.text(CONFIG.empresa, M, 744);
     doc.setFont('helvetica','normal'); doc.setTextColor(...MUT);
-    doc.text('Guía para armar tu programa anual  ·  '+CONFIG.sitio, M+52, 744);
+    doc.text('Programa Anual de Capacitación y Difusión PLD/FT  ·  '+CONFIG.sitio, M+52, 744);
     doc.text('Página '+i+' de '+tot, W-M, 744, {align:'right'});
   }
+  doc.setPage(tot);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(...MUT);
+  doc.text(doc.splitTextToSize(pdfSafe(
+    'Documento de apoyo elaborado por ' + CONFIG.empresa + ' con base en la Guía para el desarrollo del Programa Anual de Capacitación y Difusión en materia de PLD/FT publicada por la CNBV en abril de 2020, que la propia Comisión define como no vinculante. No sustituye las Disposiciones aplicables a cada sector ni constituye asesoría legal.'), ANCHO), M, 700);
 
   ev('ViewContent', { content_name:'Guia programa anual' });
-  doc.save('Guia-Programa-Anual-PLD-FT-360Educa.pdf');
+  doc.save('Programa-Anual-PLDFT-' + (datos && datos.folio ? datos.folio : CONFIG.ciclo) + '.pdf');
 }
 
 function generarPDF(datos, r){
