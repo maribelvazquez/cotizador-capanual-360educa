@@ -26,7 +26,14 @@ body{font-family:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-
 .wrap{max-width:860px;margin:0 auto;padding:0 18px}
 
 header{background:var(--ink);color:#fff;padding:24px 0 30px;position:relative;overflow:hidden}
-header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--naranja)}
+header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--naranja);z-index:2}
+/* Fondo opcional del encabezado. Va detrás de un velo oscuro para que el
+   texto siga siendo legible pase lo que pase con la foto. */
+header .fondo{position:absolute;inset:0;background-size:cover;background-position:center;
+  opacity:.30;z-index:0}
+header .velo{position:absolute;inset:0;z-index:1;
+  background:linear-gradient(100deg, rgba(27,27,30,.94) 0%, rgba(27,27,30,.78) 55%, rgba(27,27,30,.55) 100%)}
+header .wrap{position:relative;z-index:2}
 .brandrow{display:flex;align-items:center;gap:12px;margin-bottom:22px}
 #logo-img{height:34px;width:auto;max-width:190px;display:none;background:#fff;padding:6px 11px;border-radius:8px}
 #logo-text{font-weight:800;font-size:1.05rem;letter-spacing:.16em;color:#87D895}
@@ -174,6 +181,11 @@ table.lines td.dsc{color:var(--ok);font-weight:800}
 .persona img{width:88px;height:88px;border-radius:14px;object-fit:cover;flex:0 0 88px;
   border:3px solid #fff;box-shadow:0 3px 12px rgba(27,27,30,.14)}
 .persona .p-txt{flex:1;min-width:220px}
+/* Cuando no hay foto pero sí hay nombre, se usan las iniciales.
+   Es honesto: no finge una persona que no existe y humaniza igual. */
+.persona .p-mono{flex:0 0 72px;width:72px;height:72px;border-radius:14px;
+  background:var(--naranja);color:#fff;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:1.5rem;letter-spacing:.02em;box-shadow:0 3px 12px rgba(166,99,204,.3)}
 .persona .p-nom{font-weight:800;font-size:.95rem;color:var(--ink)}
 .persona .p-rol{font-size:.82rem;color:var(--muted);margin-bottom:7px}
 
@@ -308,6 +320,8 @@ footer b{color:var(--ink)}
 <body>
 
 <header>
+  <div class="fondo" id="hd-fondo" hidden></div>
+  <div class="velo" id="hd-velo" hidden></div>
   <div class="wrap">
     <div class="brandrow">
       <img id="logo-img" alt="360Educa">
@@ -449,6 +463,7 @@ footer b{color:var(--ink)}
     <div class="cierre">
       <div class="persona">
         <img id="foto-asesor" alt="" hidden>
+        <div class="p-mono" id="asesor-mono" hidden></div>
         <div class="p-txt">
           <div class="p-nom" id="asesor-nom" hidden></div>
           <div class="p-rol" id="asesor-rol" hidden></div>
@@ -983,10 +998,12 @@ const CONFIG = {
   ],
 
   fotos: {
+    // Fondo del encabezado. Se oscurece automáticamente para que el texto se lea.
+    portada:      'assets/portada.jpg',
     // Quien atiende. Aparece al final, junto a "¿Prefieres que lo veamos juntos?"
-    asesor:       'assets/asesor.jpg',
-    asesorNombre: '',           // ej. 'Samara Barrios'
-    asesorRol:    '',           // ej. 'Dirección 360Educa'
+    asesor:       '',           // 'assets/asesor.jpg' cuando exista la foto
+    asesorNombre: '',            // ej. 'Samara Barrios' · con nombre y sin foto, salen las iniciales
+    asesorRol:    '',            // ej. 'Dirección 360Educa · te contesta el mismo día'
     // Foto del claustro o de una sesión. Aparece bajo "Lo que estás contratando".
     equipo:       'assets/equipo.jpg',
     // Foto para la tarjeta de capacitación a la medida.
@@ -1065,6 +1082,15 @@ const CONFIG = {
   empresa: '360Educa',
   ciclo:   2026,
   urlCatalogo: 'https://www.360educa.com/collections/capacitacion-anual-pldft',
+
+  /* Ligas que aparecen, y se pueden clicar, en la guía del programa anual.
+     Si alguna se deja vacía, esa línea no se imprime.                    */
+  recursos: {
+    impacto:  '',                                   // página de Impacto360
+    webinars: '',                                   // página donde se listan los webinars
+    blog:     'https://www.gmc360.com.mx/blog',
+    video:    'https://www.youtube.com/@gmc3609'
+  },
 
   // IVA. Todos los precios de este cotizador se manejan CON IVA incluido;
   // el PDF lo desglosa hacia atrás para el área contable del cliente.
@@ -1184,11 +1210,25 @@ let logoListo=false, logoData=null, logoDim=null;
       el.onerror = () => { el.hidden = true; };
       el.src = ruta;
     };
+    if (F.portada){
+      const test = new Image();
+      test.onload = () => { if(!test.naturalWidth) return;
+        $('hd-fondo').style.backgroundImage = 'url("' + F.portada + '")';
+        $('hd-fondo').hidden = false; $('hd-velo').hidden = false; };
+      test.onerror = () => {};
+      test.src = F.portada;
+    }
     poner('foto-asesor', F.asesor);
     poner('foto-equipo', F.equipo);
     poner('foto-medida', F.medida);
     if (F.asesorNombre){ $('asesor-nom').textContent = F.asesorNombre; $('asesor-nom').hidden = false; }
     if (F.asesorRol){    $('asesor-rol').textContent = F.asesorRol;    $('asesor-rol').hidden = false; }
+    /* Si hay nombre y no hay foto, las iniciales hacen el trabajo. */
+    if (F.asesorNombre && !F.asesor){
+      const ini = F.asesorNombre.trim().split(/\s+/).slice(0,2).map(x=>x.charAt(0).toUpperCase()).join('');
+      $('asesor-mono').textContent = ini;
+      $('asesor-mono').hidden = false;
+    }
   })();
 
   $('contacto-nota').innerHTML =
@@ -1956,7 +1996,7 @@ function generarGuia(datos, r){
   /* ── 2. TU PROGRAMA ── */
   nueva();
   H('2. Tu programa, con tus números',
-    'Cada colaborador cursa un solo nivel: el que corresponde a su función. La última columna compara las horas del curso contra las horas de referencia de la Guía, para que sepas cuánto te falta cubrir con difusión durante el año.');
+    'Cada colaborador cursa un solo nivel: el que corresponde a su función. La última columna no es un faltante del curso: la Guía pide capacitación continua a lo largo del año, así que ningún curso individual pretende cubrir el total de horas de referencia. Ese resto se llena con las actividades de la sección 4.');
 
   const filasProg = NIVELES.map(n => {
     const linea = r ? r.lineas.find(l => l.id === n.id) : null;
@@ -1965,7 +2005,7 @@ function generarGuia(datos, r){
     let dif = '—';
     if (ref.horas){
       const falta = ref.horas - hCurso;
-      dif = falta > 0 ? falta + ' h con difusión' : 'Cubierto';
+      dif = falta > 0 ? falta + ' h en el año' : 'Cubierto';
     }
     return [
       (linea ? '**' : '') + n.who,
@@ -1976,11 +2016,11 @@ function generarGuia(datos, r){
       dif
     ];
   });
-  tabla(['PERFIL','NIVEL','CURSO','PERSONAS','REF. GUÍA','DIFERENCIA'],
+  tabla(['PERFIL','NIVEL','CURSO','PERSONAS','REF. GUÍA','RESTO DEL AÑO'],
         [122, 128, 42, 58, 54, ANCHO-404], filasProg);
 
   nota('Cómo se lee esta tabla',
-    'El curso anual es la columna vertebral del programa y es lo que deja constancia con nombre, temario y horas. Las horas que faltan para llegar a la referencia de la Guía se cubren con el programa de difusión de la página siguiente: cápsulas, correos, webinars y sesiones cortas a lo largo del año. Las dos cosas juntas son el programa; ninguna sola lo es.', VERDE);
+    'El curso anual es la columna vertebral: es lo que deja constancia individual con nombre, temario, horas y evaluación, que es la evidencia que se pide en una revisión. La Guía, además, sugiere que el contenido del programa se distribuya durante todo el año. Por eso el resto de las horas de referencia se completa con actividades continuas, no porque el curso quede corto sino porque un programa anual, por definición, dura un año.', VERDE);
 
   if (r && r.personas){
     P('Tu programa cubre a ' + r.personas + (r.personas===1?' persona':' personas') + ' en ' +
@@ -2009,7 +2049,7 @@ function generarGuia(datos, r){
     const tema = TEMAS_DIFUSION[i % TEMAS_DIFUSION.length];
     let accion;
     if (i === 0){
-      accion = 'Presentar el programa al Comité para su aprobación. Dar de alta al personal en la plataforma y comunicar por dentro quién cursa qué y por qué.';
+      accion = 'Incorporar estos cursos al programa anual y documentarlo ante el Comité. Dar de alta al personal en la plataforma y comunicar por dentro quién cursa qué y por qué.';
     } else if (i === 1 && restantes > 3){
       accion = 'Arranque de los cursos de la plantilla general y del área comercial. Primer corte de avance al final del mes.';
     } else if (i === 2 && restantes > 4){
@@ -2021,10 +2061,12 @@ function generarGuia(datos, r){
     } else {
       accion = 'Seguimiento del avance y atención a nuevos ingresos del mes.';
     }
-    filasCal.push([(i===0||i===restantes-1?'**':'') + nombre, accion, tema[0]]);
+    filasCal.push([(i===0||i===restantes-1?'**':'') + nombre, accion]);
   }
-  tabla(['MES','CAPACITACIÓN Y SEGUIMIENTO','TEMA DE DIFUSIÓN'],
-        [72, 250, ANCHO-322], filasCal);
+  tabla(['MES','QUÉ TOCA ESE MES'], [90, ANCHO-90], filasCal);
+
+  nota('¿Cuándo se aprueba el programa?',
+    'La Guía de la CNBV no fija una fecha: señala que el Oficial de Cumplimiento lo elabora y lo somete a la aprobación de su Comité, cuando se cuente con este. Lo que sí conviene revisar es qué pide el régimen específico de tu entidad, porque algunos sectores tienen obligaciones propias de presentación. Si el programa del ciclo ya está aprobado, la incorporación de estos cursos se documenta como una actualización ante el Comité, no como un programa nuevo.');
 
   if (restantes <= 3){
     nota('Vas con el tiempo justo',
@@ -2036,29 +2078,36 @@ function generarGuia(datos, r){
 
   /* ── 4. DIFUSIÓN ── */
   nueva();
-  H('4. El programa de difusión',
-    'Es la mitad del programa que casi nadie documenta, y es la que cubre las horas que el curso anual no alcanza. La Guía la trata como un apartado propio y pide dejar por escrito los medios o canales.');
+  H('4. La difusión: la otra mitad del programa',
+    'La Guía dedica un apartado propio a la difusión y pide dejar por escrito los medios o canales. Es la parte que casi nadie documenta y la que convierte un programa de un día en un programa de doce meses.');
 
-  P('Doce temas listos para calendarizar. Todos salen del temario mínimo que señala la Guía, así que cada publicación es evidencia de que el programa se cumplió durante el año.');
+  P('Doce temas listos para calendarizar, uno por mes. Todos salen del temario mínimo que señala la Guía, así que cada publicación es evidencia de que el programa se sostuvo durante el año. No sustituyen al curso anual: lo acompañan.');
   tabla(['TEMA','CANAL SUGERIDO'], [ANCHO-160, 160],
         TEMAS_DIFUSION.map(t => [t[0], t[1]]));
 
   nota('De dónde sacar el material sin producirlo tú',
     'La Guía permite que el programa incluya capacitación impartida por instituciones educativas y profesionales de la materia. En la práctica eso significa que no tienes que escribir doce cápsulas: puedes apoyarte en material publicado y dejar constancia de la difusión. 360Educa publica análisis y webinars de forma continua, y con eso se alimenta buena parte del calendario de arriba.', VERDE);
 
-  P('Fuentes de apoyo:');
-  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...MUT);
-  [['Impacto360', 'publicación mensual de análisis y novedades del régimen preventivo'],
-   ['Webinars', 'sesiones en vivo sobre temas de coyuntura, con material descargable'],
-   ['Blog', 'gmc360.com.mx/blog'],
-   ['Canal de video', 'youtube.com/@gmc3609']].forEach(f => {
-    sitio(14);
-    doc.setFont('helvetica','bold'); doc.setTextColor(...NAR); doc.text(pdfSafe(f[0]), M, y);
-    doc.setFont('helvetica','normal'); doc.setTextColor(...MUT);
-    doc.text(pdfSafe('   ·   ' + f[1]), M + doc.getTextWidth(pdfSafe(f[0])), y);
-    y += 14;
+  P('Material que puedes usar, con liga directa:');
+  const RC = CONFIG.recursos || {};
+  [['Impacto360', 'Publicación mensual de análisis y novedades del régimen preventivo.', RC.impacto],
+   ['Webinars',   'Sesiones en vivo sobre temas de coyuntura, con material descargable.', RC.webinars],
+   ['Blog',       'Artículos y análisis para citar en tus comunicados internos.',          RC.blog],
+   ['Canal de video', 'Sesiones grabadas, útiles como cápsula para compartir por dentro.', RC.video]
+  ].filter(f => f[2]).forEach(f => {
+    sitio(30);
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...INK);
+    doc.text(pdfSafe(f[0]), M, y);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...MUT);
+    doc.text(pdfSafe(f[1]), M + 92, y);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...NAR);
+    const liga = f[2].replace(/^https?:\/\//,'');
+    doc.textWithLink(pdfSafe(liga), M + 92, y + 11, { url: f[2] });
+    doc.setDrawColor(...NAR); doc.setLineWidth(.4);
+    doc.line(M + 92, y + 12.5, M + 92 + doc.getTextWidth(pdfSafe(liga)), y + 12.5);
+    y += 27;
   });
-  y += 10;
+  y += 6;
 
   nota('Qué documentar de cada difusión',
     'Fecha, tema, canal utilizado, a quién se dirigió y el material o liga que se compartió. Con eso, doce correos al año se convierten en doce piezas de evidencia. Sin eso, no existieron.');

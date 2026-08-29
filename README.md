@@ -32,11 +32,14 @@ Si el número o el correo cambian, se editan aquí y se actualizan solos en la p
 
 Todas van en `assets/` y **todas son opcionales**: si el archivo no está, la imagen se oculta sola y la página se ve bien igual. Se configuran en el bloque `fotos` de `CONFIG`.
 
-| Archivo | Dónde sale | Medida sugerida |
-|---|---|---|
-| `assets/equipo.jpg` | Banda ancha bajo "Lo que estás contratando" | 1400 × 500 px |
-| `assets/medida.jpg` | Cuadro en la tarjeta de capacitación a la medida | 500 × 500 px |
-| `assets/asesor.jpg` | Retrato en "¿Prefieres que lo veamos juntos?" | 500 × 500 px |
+| Archivo | Dónde sale | Medida | Peso máx. |
+|---|---|---|---|
+| `assets/portada.jpg` | Fondo del encabezado, con velo oscuro encima | 1600 × 900 px | 300 KB |
+| `assets/equipo.jpg` | Banda ancha bajo "Lo que estás contratando" | 1400 × 500 px | 250 KB |
+| `assets/medida.jpg` | Cuadro en la tarjeta de capacitación a la medida | 600 × 600 px | 150 KB |
+| `assets/asesor.jpg` | Retrato en "¿Prefieres que lo veamos juntos?" | 600 × 600 px | 150 KB |
+
+**Para cambiar una imagen después:** se reemplaza el archivo por otro con **el mismo nombre** y se vuelve a subir. No hay que tocar el código ni avisarle a nadie.
 
 Además, en `CONFIG.fotos` se pueden llenar `asesorNombre` y `asesorRol` para que junto al retrato aparezca quién es. Es lo que más humaniza la página: deja de ser un formulario y pasa a ser una persona.
 
