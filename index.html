@@ -294,6 +294,11 @@ table.lines td.dsc{color:var(--ok);font-weight:800}
 .perso ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;margin:16px 0 18px;position:relative}
 .perso li{font-size:.87rem;color:#EDE7F4;padding-left:19px;position:relative;line-height:1.45}
 .perso li::before{content:"›";position:absolute;left:0;color:var(--coral);font-weight:800}
+.perso .modalidades{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:7px 16px;margin:4px 0 18px;
+  padding-top:14px;border-top:1px solid rgba(255,255,255,.14)}
+.perso .modalidades b{color:#fff;font-size:.85rem;font-weight:700;display:block}
+.perso .modalidades span{color:rgba(255,255,255,.66);font-size:.79rem}
+@media(max-width:700px){ .perso .modalidades{grid-template-columns:1fr} }
 .perso .pcta{display:flex;gap:10px;flex-wrap:wrap;position:relative}
 .perso .pbtn{padding:12px 18px;border-radius:10px;font-size:.9rem;font-weight:700;text-decoration:none;
   display:inline-flex;align-items:center;gap:8px;transition:filter .18s}
@@ -326,18 +331,6 @@ footer b{color:var(--ink)}
   .bar-l strong{font-size:1.12rem}
 }
 </style>
-
-<!-- ══════════════════════════════════════════════════════════════
-     CÓDIGO DE SEGUIMIENTO DE CLIENTIFY
-     Es lo que permite que una "araña" de Clientify lea el formulario
-     de esta página y cree el contacto automáticamente.
-     Dominio autorizado: cotiza-capanual-360educa.netlify.app
-     Si el cotizador cambia de dirección, hay que actualizar el
-     dominio en Clientify o este código deja de registrar.
-     ══════════════════════════════════════════════════════════════ -->
-<!--Clientify Tracking Begins-->
-<script defer src="https://analyticsplusdev.clientify.net/analytics_plus/pixel/au9NguL9Wpxm8now"></script>
-<!--Clientify Tracking Ends-->
 
 </head>
 <body>
@@ -478,9 +471,11 @@ footer b{color:var(--ink)}
         <li>Evaluaciones y evidencias diseñadas para tu expediente</li>
         <li>Acompañamiento de nuestro claustro durante todo el programa</li>
       </ul>
+      <div class="modalidades" id="modalidades"></div>
       <div class="pcta">
         <a class="pbtn a" href="#" id="lnk-perso-wa">Cuéntanos qué necesitas</a>
         <a class="pbtn b" href="#" id="lnk-perso-mail">Escribirnos por correo</a>
+        <a class="pbtn b" id="lnk-perso-ver" target="_blank" rel="noopener">Ver el detalle</a>
       </div>
     </div>
   </section>
@@ -1111,6 +1106,16 @@ const CONFIG = {
   empresa: '360Educa',
   ciclo:   2026,
   urlCatalogo: 'https://www.360educa.com/collections/capacitacion-anual-pldft',
+  urlPersonalizada: 'https://www.360educa.com/courses/capacitaciones-personalizadas',
+
+  /* Modalidades de la capacitación a la medida. Aparecen en la tarjeta
+     y se listan en el correo, para que el prospecto ya venga con una elegida. */
+  modalidades: [
+    ['Remota', 'Sesiones en línea'],
+    ['Híbrida remota', 'Sesiones en línea más acceso en plataforma'],
+    ['Híbrida presencial', 'Sesión presencial más acceso en plataforma'],
+    ['Presencial', 'El capacitador asiste a tu institución']
+  ],
 
   /* Ligas que aparecen, y se pueden clicar, en la guía del programa anual.
      Si alguna se deja vacía, esa línea no se imprime.                    */
@@ -1150,23 +1155,28 @@ const NIVELES = [
   { id:'ind', who:'Personal que entró este año',
     course:'Curso de Inducción en PLD/FT 2026', h:'2 h',
     lista:638,  preB:null,
-    para:'Personal de nuevo ingreso, cualquier área', url:'' },
+    para:'Personal de nuevo ingreso, cualquier área',
+    url:'https://www.360educa.com/courses/induccion2026' },
   { id:'bie', who:'Área comercial y promoción',
     course:'Capacitación Anual │ Bienvenido al Mundo de PLD/FT 2026', h:'4 h',
     lista:1249, preB:979,
-    para:'Ventas y promoción sin conocimiento previo en PLD', url:'' },
+    para:'Ventas y promoción sin conocimiento previo en PLD',
+    url:'https://www.360educa.com/courses/capacitacion-anual-pld-ft-bienvenido-al-mundo-de-pld-ft-2026' },
   { id:'gen', who:'Plantilla general',
     course:'Capacitación Anual │ General 2026', h:'8 h',
     lista:1619, preB:1299,
-    para:'Operación, administración, sistemas y primera línea con base previa', url:'' },
+    para:'Operación, administración, sistemas y primera línea con base previa',
+    url:'https://www.360educa.com/courses/capacitacion-anual-pld-ft-general-2026' },
   { id:'dir', who:'Dirección, gerencia y consejo',
     course:'Capacitación Anual │ Alta Dirección 2026', h:'3 h',
     lista:3019, preB:2479,
-    para:'Directivos, consejo de administración y gerentes', url:'' },
+    para:'Directivos, consejo de administración y gerentes',
+    url:'https://www.360educa.com/courses/capacitacion-anual-pld-ft-alta-direccion-2026' },
   { id:'esp', who:'Cumplimiento, auditoría y CCC',
     course:'Capacitación Anual │ Especializada 2026', h:'16 h',
     lista:3469, preB:2589,
-    para:'Oficiales de cumplimiento, auditores y miembros del Comité', url:'' }
+    para:'Oficiales de cumplimiento, auditores y miembros del Comité',
+    url:'https://www.360educa.com/courses/capacitacion-anual-pld-ft-especializada-2026' }
 ];
 
 /* ── Utilidades ── */
@@ -1217,6 +1227,17 @@ let logoListo=false, logoData=null, logoDim=null;
     }
     html += '<option value="-1">Todavía no lo decidimos</option>';
     sel.innerHTML = html;
+  })();
+
+  /* Modalidades de la capacitación a la medida */
+  (function modalidades(){
+    const M = CONFIG.modalidades || [];
+    if (!M.length) return;
+    $('modalidades').innerHTML =
+      '<div style="grid-column:1/-1;font-size:.76rem;letter-spacing:.13em;text-transform:uppercase;font-weight:800;color:#87D895;margin-bottom:2px">Cuatro modalidades</div>' +
+      M.map(m => `<div><b>${m[0]}</b><span>${m[1]}</span></div>`).join('');
+    if (CONFIG.urlPersonalizada) $('lnk-perso-ver').href = CONFIG.urlPersonalizada;
+    else $('lnk-perso-ver').hidden = true;
   })();
 
   /* Franja de experiencia. Si no hay credenciales cargadas, no se pinta:
@@ -1810,13 +1831,28 @@ document.addEventListener('click', e => {
   if(!id) return;
   if(id==='lnk-perso-wa'){
     e.preventDefault();
-    abrirWA('Hola, me interesa la capacitación personalizada para mi institución: necesitamos un temario propio o una modalidad distinta a los cursos de catálogo. ¿Podemos platicarlo?','Capacitacion personalizada');
+    abrirWA('Hola, me interesa la capacitación personalizada para mi institución.\n\n' +
+      'Institución:\n' +
+      'Número aproximado de personas:\n' +
+      'Modalidad que nos interesa (remota / híbrida remota / híbrida presencial / presencial):\n' +
+      'Fechas estimadas:\n' +
+      'Qué necesitamos distinto:', 'Capacitacion personalizada');
   }
   if(id==='lnk-perso-mail'){
     e.preventDefault();
     ev('Contact',{content_name:'Capacitacion personalizada correo'});
+    const cuerpo =
+      'Hola, me interesa la capacitación personalizada. Les cuento lo que necesitamos:\n\n' +
+      'Institución:\n' +
+      'Número aproximado de personas:\n\n' +
+      'Modalidad que nos interesa (marca una):\n' +
+      (CONFIG.modalidades || []).map(m => '   ( ) ' + m[0] + ' - ' + m[1]).join('\n') + '\n\n' +
+      'Fechas estimadas de la capacitación:\n' +
+      '   Del:\n' +
+      '   Al:\n\n' +
+      'Qué necesitamos distinto a los cursos de catálogo:\n\n';
     window.location.href = 'mailto:'+CONFIG.correo+'?subject='+encodeURIComponent('Capacitación personalizada para mi institución')
-      +'&body='+encodeURIComponent('Hola, me interesa la capacitación personalizada. Les cuento lo que necesitamos:\n\nInstitución:\nNúmero aproximado de personas:\nQué necesitamos distinto:\n');
+      +'&body='+encodeURIComponent(cuerpo);
   }
   if(id==='b-ver'){ e.preventDefault(); abrir('ver'); }
   if(id==='lnk-otra'){ e.preventDefault(); limpiarTodo(); }
@@ -2607,6 +2643,19 @@ if (CONFIG.momentoDatos === 'inicio'){
   setTimeout(()=>{ if(!identificado) abrir('inicio'); }, 900);
 }
 </script>
+
+<!-- ══════════════════════════════════════════════════════════════
+     CÓDIGO DE SEGUIMIENTO DE CLIENTIFY
+     Va justo antes de </body> porque es donde lo pide la
+     documentación de las Arañas: es lo que permite que Clientify
+     lea el formulario de esta página y cree el contacto solo.
+     Dominio autorizado: cotiza-capanual-360educa.netlify.app
+     Si el cotizador cambia de dirección, hay que actualizar el
+     dominio en Clientify o este código deja de registrar.
+     ══════════════════════════════════════════════════════════════ -->
+<!--Clientify Tracking Begins-->
+<script defer src="https://analyticsplusdev.clientify.net/analytics_plus/pixel/au9NguL9Wpxm8now"></script>
+<!--Clientify Tracking Ends-->
 
 </body>
 </html>
