@@ -923,12 +923,27 @@ const CONFIG = {
      caen solas en una hoja de cálculo que es tuya. El paso a paso está
      en el README y en el manual de Gaby.
      Aquí tampoco va nunca un token ni una contraseña.            */
-  respaldo: '',
+  respaldo: 'https://docs.google.com/forms/d/e/1FAIpQLSc54P7vqjomMkSqk31d2lUoxwVU8hedAX2_55Z28imXNlfvLA/formResponse',
   respaldoFormato: 'form',
   /* Si el respaldo es un Formulario de Google, sus campos NO se llaman
      como los de Clientify: se llaman entry.123456789. Se mapean aquí.
      Se deja vacío para usar los mismos nombres de CONFIG.campos.   */
-  respaldoCampos: {},
+  respaldoCampos: {
+    institucion:  'entry.369898594',
+    tipo_entidad: 'entry.1441838115',
+    nombre:       'entry.273267587',
+    correo:       'entry.878733659',
+    telefono:     'entry.1219595119',
+    personas:     'entry.387599049',
+    tramo:        'entry.527318394',
+    descuento:    'entry.1954536782',
+    subtotal:     'entry.438241482',
+    iva:          'entry.2083433619',
+    total:        'entry.283676708',
+    folio:        'entry.557396588',
+    detalle:      'entry.122273472',
+    origen:       'entry.1209322630'
+  },
 
   /* Nombres de los campos del lado de Clientify. Si el formulario usa
      otros nombres, se cambian aquí y no hay que tocar nada más. */
