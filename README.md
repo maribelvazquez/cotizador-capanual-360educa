@@ -34,7 +34,8 @@ Todas van en `assets/` y **todas son opcionales**: si el archivo no está, la im
 
 | Archivo | Dónde sale | Medida | Peso máx. |
 |---|---|---|---|
-| `assets/portada.jpg` | Fondo del encabezado, con velo oscuro encima | 1600 × 900 px | 300 KB |
+| `assets/hero.jpg` | **Imagen principal**, completa y sin recortar, debajo del encabezado. Es la única que puede llevar texto propio. | 1600 × 900 px (16:9) | 300 KB |
+| `assets/portada.jpg` | Fondo del encabezado, con velo oscuro encima. Solo para texturas o fotos de bajo contraste, **nunca para imágenes con texto**. | 1600 × 900 px | 300 KB |
 | `assets/equipo.jpg` | Banda ancha bajo "Lo que estás contratando" | 1400 × 500 px | 250 KB |
 | `assets/medida.jpg` | Cuadro en la tarjeta de capacitación a la medida | 600 × 600 px | 150 KB |
 | `assets/asesor.jpg` | Retrato en "¿Prefieres que lo veamos juntos?" | 600 × 600 px | 150 KB |
