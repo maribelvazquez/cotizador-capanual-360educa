@@ -20,6 +20,7 @@
   --sombra:0 1px 2px rgba(27,27,30,.05),0 6px 18px rgba(27,27,30,.08);
 }
 *{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{font-family:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
   background:var(--bg);color:var(--ink);line-height:1.55;padding-bottom:112px;-webkit-font-smoothing:antialiased}
@@ -121,6 +122,8 @@ table.lines td.dsc{color:var(--ok);font-weight:800}
 .btn-pdf:hover:not(:disabled){background:var(--naranja-d)}
 .btn-wa{background:#1FA855;color:#fff}
 .btn-wa:hover:not(:disabled){filter:brightness(1.08)}
+.btn-guia{background:var(--card);color:var(--naranja-d);border:1.5px solid var(--naranja)}
+.btn-guia:hover:not(:disabled){background:var(--naranja-bg)}
 .btn-mail{background:#fff;color:var(--naranja-d);border:1.5px solid #DCC9EE}
 .btn-mail:hover:not(:disabled){background:var(--naranja-bg);border-color:var(--naranja)}
 
@@ -178,8 +181,9 @@ table.lines td.dsc{color:var(--ok);font-weight:800}
 @media(max-width:700px){ .credenciales{grid-template-columns:1fr 1fr} }
 
 .persona{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-.persona img{width:88px;height:88px;border-radius:14px;object-fit:cover;flex:0 0 88px;
+.persona img{width:190px;height:130px;border-radius:13px;object-fit:cover;flex:0 0 190px;
   border:3px solid #fff;box-shadow:0 3px 12px rgba(27,27,30,.14)}
+@media(max-width:600px){ .persona img{width:100%;height:150px;flex:1 1 100%} }
 .persona .p-txt{flex:1;min-width:220px}
 /* Cuando no hay foto pero sí hay nombre, se usan las iniciales.
    Es honesto: no finge una persona que no existe y humaniza igual. */
@@ -196,10 +200,11 @@ table.lines td.dsc{color:var(--ok);font-weight:800}
 .hero{width:100%;display:block;border-radius:0 0 15px 15px;box-shadow:var(--sombra)}
 .hero-wrap{margin:0 0 4px}
 
-.perso .p-foto{width:92px;height:92px;border-radius:14px;object-fit:cover;flex:0 0 92px;
+.perso .p-foto{width:160px;height:160px;border-radius:14px;object-fit:cover;flex:0 0 160px;
   border:3px solid rgba(255,255,255,.22)}
-.perso .p-fila{display:flex;gap:18px;align-items:flex-start;position:relative}
-.perso .p-fila>div{flex:1;min-width:0}
+@media(max-width:600px){ .perso .p-foto{width:100%;height:190px;flex:1 1 100%} }
+.perso .p-fila{display:flex;gap:18px;align-items:flex-start;position:relative;flex-wrap:wrap}
+.perso .p-fila>div{flex:1;min-width:240px}
 
 .limpiar-fila{display:flex;justify-content:flex-end;margin-top:12px}
 .limpiar{background:none;border:0;font-family:inherit;font-size:.83rem;font-weight:700;color:var(--muted);
@@ -407,7 +412,7 @@ footer b{color:var(--ink)}
       <div class="r-ico">📄</div>
       <div class="r-txt">
         <h4>Y te llevas la guía para armar tu programa anual</h4>
-        <p>Un PDF con los seis pasos del programa, el checklist de evidencias para el expediente y los errores que más se repiten. Se descarga junto con tu cotización, sin costo.</p>
+        <p>Un PDF con la estructura que pide la Guía de la CNBV, tu calendario mes por mes, el checklist de constancias y los errores más comunes. <b>Aparece aquí abajo, junto a tu cotización, en cuanto la calcules.</b> Sin costo.</p>
       </div>
     </div>
   </section>
@@ -433,6 +438,7 @@ footer b{color:var(--ink)}
 
     <div class="cta">
       <button class="btn btn-pdf" id="b-pdf" disabled><span>↓</span> Descargar mi cotización en PDF</button>
+      <button class="btn btn-guia" id="b-guia" disabled><span>↓</span> Descargar la guía del programa anual</button>
       <button class="btn btn-wa" id="b-wa"><span>✆</span> Escribir por WhatsApp</button>
       <button class="btn btn-mail" id="b-mail"><span>✉</span> Escribir por correo</button>
     </div>
@@ -1011,7 +1017,7 @@ const CONFIG = {
     // Fondo del encabezado. Se oscurece automáticamente para que el texto se lea.
     portada:      '',
     // Quien atiende. Aparece al final, junto a "¿Prefieres que lo veamos juntos?"
-    asesor:       '',           // 'assets/asesor.jpg' cuando exista la foto
+    asesor:       'assets/asesor.jpg',
     asesorNombre: '',            // ej. 'Samara Barrios' · con nombre y sin foto, salen las iniciales
     asesorRol:    '',            // ej. 'Dirección 360Educa · te contesta el mismo día'
     // Foto del claustro o de una sesión. Aparece bajo "Lo que estás contratando".
@@ -1096,10 +1102,11 @@ const CONFIG = {
   /* Ligas que aparecen, y se pueden clicar, en la guía del programa anual.
      Si alguna se deja vacía, esa línea no se imprime.                    */
   recursos: {
-    impacto:  '',                                   // página de Impacto360
-    webinars: '',                                   // página donde se listan los webinars
-    blog:     'https://www.gmc360.com.mx/blog',
-    video:    'https://www.youtube.com/@gmc3609'
+    gratuitos: 'https://www.360educa.com/collections/cursos-gratuitos',
+    impacto:   '',                                  // página de Impacto360
+    webinars:  '',                                  // página donde se listan los webinars
+    blog:      'https://www.gmc360.com.mx/blog',
+    video:     'https://www.youtube.com/@gmc3609'
   },
 
   // IVA. Todos los precios de este cotizador se manejan CON IVA incluido;
@@ -1372,6 +1379,9 @@ function render(){
   /* El PDF necesita al menos una persona capturada; escribirnos, nunca:
      alguien con dudas debe poder contactarnos desde el primer segundo. */
   $('b-pdf').disabled = !hay;
+  /* La guía sale personalizada con sus perfiles y su fecha de arranque,
+     así que necesita que la persona ya se haya identificado. */
+  $('b-guia').disabled = !hay || !identificado;
 
   /* ¿Hay que tapar los números hasta saber quién es? */
   const tapar = CONFIG.momentoDatos !== 'descarga' && !identificado;
@@ -1446,7 +1456,7 @@ function render(){
       <div class="r-ok">✓</div>
       <div>
         <strong>Revisa que los números estén bien.</strong>
-        <p>Si todo cuadra, aquí abajo descargas tu cotización en PDF —con folio, lista para presentar— y la guía para armar tu programa anual.</p>
+        <p>Si todo cuadra, aquí abajo tienes <b>dos descargas</b>: tu cotización en PDF, con folio y lista para presentar, y la guía para armar tu programa anual. Son dos botones distintos.</p>
       </div>
       <div class="flecha">↓</div>
     </div>`;
@@ -1465,7 +1475,7 @@ function cortina(r){
     <div class="g-resumen">${pills}</div>
     <p>Dinos a nombre de quién la emitimos y te mostramos el desglose por nivel, tu descuento por volumen y el total.</p>
     <button class="btn btn-pdf" id="b-ver">Ver mi cotización</button>
-    <div class="g-nota">Treinta segundos. Te llevas también la guía para armar tu programa anual, sin costo.</div>
+    <div class="g-nota">Treinta segundos. Al terminar te llevas dos archivos: tu cotización y la guía para armar tu programa anual, sin costo.</div>
   </div>`;
 }
 
@@ -1699,7 +1709,7 @@ function mostrarListo(datos, r){
       <p>Quedó con el folio <b>${datos.folio}</b>, a nombre de <b>${datos.inst}</b>.
          Ya tenemos tus datos y te vamos a buscar para ayudarte a ajustarla si hace falta.
          Si quieres que sea hoy mismo, escríbenos y menciona ese folio.</p>
-      <p style="margin-top:-4px">Y aquí está la guía que te prometimos, con los seis pasos del programa y el checklist de evidencias:</p>
+      <p style="margin-top:-4px">Y aquí está la guía que te prometimos. Es un archivo aparte, con tu calendario y tus perfiles:</p>
       <div class="lbtns" style="margin-bottom:14px">
         <a class="lbtn guia" href="#" id="lnk-guia">↓ Descargar la guía del programa anual</a>
       </div>
@@ -1776,6 +1786,7 @@ function enviarWhatsApp(datos){
 }
 $('b-wa').addEventListener('click', () => enviarWhatsApp(null));
 $('b-mail').addEventListener('click', () => enviarCorreo(null));
+$('b-guia').addEventListener('click', () => { if(cliente) generarGuia(cliente, calcular()); });
 $('fab-wa').addEventListener('click', e => { e.preventDefault(); enviarWhatsApp(null); });
 function abrirWA(texto, etiqueta){
   ev('Contact', { content_name: etiqueta });
@@ -2101,22 +2112,28 @@ function generarGuia(datos, r){
 
   P('Material que puedes usar, con liga directa:');
   const RC = CONFIG.recursos || {};
-  [['Impacto360', 'Publicación mensual de análisis y novedades del régimen preventivo.', RC.impacto],
+  [['Cursos gratuitos', 'Catálogo sin costo que sí emite constancia. Vale la pena revisarlo: hay temas que suman al programa y la constancia es evidencia.', RC.gratuitos],
+   ['Impacto360', 'Publicación mensual de análisis y novedades del régimen preventivo.', RC.impacto],
    ['Webinars',   'Sesiones en vivo sobre temas de coyuntura, con material descargable.', RC.webinars],
    ['Blog',       'Artículos y análisis para citar en tus comunicados internos.',          RC.blog],
    ['Canal de video', 'Sesiones grabadas, útiles como cápsula para compartir por dentro.', RC.video]
   ].filter(f => f[2]).forEach(f => {
-    sitio(30);
+    const X = M + 98;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+    const desc = doc.splitTextToSize(pdfSafe(f[1]), ANCHO - 98);
+    const alto = desc.length*10.5 + 17;
+    sitio(alto + 6);
     doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...INK);
     doc.text(pdfSafe(f[0]), M, y);
     doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...MUT);
-    doc.text(pdfSafe(f[1]), M + 92, y);
+    doc.text(desc, X, y);
+    const ly = y + desc.length*10.5 + 2;
     doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...NAR);
     const liga = f[2].replace(/^https?:\/\//,'');
-    doc.textWithLink(pdfSafe(liga), M + 92, y + 11, { url: f[2] });
+    doc.textWithLink(pdfSafe(liga), X, ly, { url: f[2] });
     doc.setDrawColor(...NAR); doc.setLineWidth(.4);
-    doc.line(M + 92, y + 12.5, M + 92 + doc.getTextWidth(pdfSafe(liga)), y + 12.5);
-    y += 27;
+    doc.line(X, ly + 1.5, X + doc.getTextWidth(pdfSafe(liga)), ly + 1.5);
+    y += alto + 6;
   });
   y += 6;
 
@@ -2161,8 +2178,36 @@ function generarGuia(datos, r){
   });
   y += 12;
 
-  nota('Resguardo: cinco años',
-    'Toda la información y documentación generada por capacitación y difusión —materiales, evidencia de las evaluaciones y constancias emitidas— debe conservarse, física o digitalmente, al menos cinco años contados desde su elaboración. Conviene definir desde ahora dónde vive ese expediente y quién lo mantiene.');
+  /* Recuadro de entrega: la lista de arriba es lo que pide la Guía;
+     esto es lo que nosotros entregamos contra esa lista. */
+  (function entrega(){
+    const puntos = [
+      'Constancia individual por persona y por curso, con nombre completo, cargo, temario, horas, fecha y resultado.',
+      'Resultados de las evaluaciones de cada participante, no solo la calificación aprobatoria.',
+      'Reporte de avance para que sepas, durante el año, quién terminó y quién va pendiente.',
+      'Todo en un paquete final ordenado, listo para integrarse al expediente y para una auditoría.'
+    ];
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+    const partes = puntos.map(t => doc.splitTextToSize(pdfSafe(t), ANCHO-46));
+    const alto = 34 + partes.reduce((a,p)=>a+p.length*10.5+3, 0) + 12;
+    sitio(alto);
+    doc.setFillColor(238,249,241); doc.rect(M,y,ANCHO,alto,'F');
+    doc.setFillColor(...VERDE); doc.rect(M,y,3,alto,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(22,64,40);
+    doc.text('Así te lo entregamos nosotros', M+14, y+18);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(31,86,56);
+    doc.text('Contra esa misma lista, sin que tengas que armarlo ni perseguir a nadie:', M+14, y+30);
+    let py = y+45;
+    partes.forEach(pt => {
+      doc.setTextColor(...VERDE); doc.text('·', M+16, py);
+      doc.setTextColor(31,86,56); doc.text(pt, M+26, py);
+      py += pt.length*10.5 + 3;
+    });
+    y += alto + 14;
+  })();
+
+  nota('Resguardo: cuenta diez años, no cinco',
+    'La Guía señala un mínimo de cinco años para la documentación de capacitación y difusión: materiales, evidencia de las evaluaciones y constancias emitidas. Pero el criterio general de conservación del régimen preventivo en el sector financiero es de diez años, así que en la práctica conviene resguardar el expediente de capacitación por diez y no por cinco. Revisa el plazo que aplica a tu régimen y define desde ahora dónde vive ese expediente y quién lo mantiene.');
 
   /* ── 6. ERRORES Y CIERRE ── */
   nueva();
@@ -2191,15 +2236,61 @@ function generarGuia(datos, r){
     y += alto;
   });
 
-  y += 14;
+  y += 18;
+  sitio(230);
+  H('7. Dos formas de seguir', null, VERDE);
+
+  /* Dos caminos, para que el lector se ubique en uno de los dos y no
+     tenga que preguntar cuál le toca. */
+  (function caminos(){
+    const cols = [
+      ['Como está',
+       'Los cursos del catálogo cubren los cinco perfiles y tu programa queda armado con este borrador. Es lo más rápido, y es lo que la mayoría de las instituciones necesita.',
+       ['Arrancas en cuanto se autorice', 'Precio por volumen ya aplicado', 'Constancias y evidencia incluidas'],
+       NAR],
+      ['A la medida',
+       'Si tu operación necesita temario propio construido sobre tus políticas y casos reales, otras horas, o sesiones en vivo para el consejo, lo diseñamos por proyecto.',
+       ['Contenido con tu manual y tus casos', 'Las horas que necesites', 'Sesiones en vivo o presenciales'],
+       CORAL]
+    ];
+    const anchoCol = (ANCHO - 16) / 2;
+    let altoMax = 0;
+    const cuerpos = cols.map(c => {
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+      return doc.splitTextToSize(pdfSafe(c[1]), anchoCol - 28);
+    });
+    cols.forEach((c,i) => {
+      altoMax = Math.max(altoMax, 42 + cuerpos[i].length*10.5 + c[2].length*13 + 16);
+    });
+    sitio(altoMax + 20);
+    cols.forEach((c,i) => {
+      const x = M + i*(anchoCol + 16);
+      doc.setDrawColor(...LIN); doc.setLineWidth(1);
+      doc.roundedRect(x, y, anchoCol, altoMax, 6, 6, 'S');
+      doc.setFillColor(...c[3]); doc.rect(x, y, anchoCol, 4, 'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...INK);
+      doc.text(pdfSafe(c[0]), x+14, y+26);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...MUT);
+      doc.text(cuerpos[i], x+14, y+42);
+      let ly = y + 42 + cuerpos[i].length*10.5 + 12;
+      c[2].forEach(p => {
+        doc.setTextColor(...c[3]); doc.setFont('helvetica','bold'); doc.text('>', x+14, ly);
+        doc.setTextColor(57,62,65); doc.setFont('helvetica','normal');
+        doc.text(doc.splitTextToSize(pdfSafe(p), anchoCol-34), x+24, ly);
+        ly += 13;
+      });
+    });
+    y += altoMax + 20;
+  })();
+
   sitio(120);
   doc.setFillColor(...INK); doc.rect(M,y,ANCHO,100,'F');
   doc.setFillColor(...CORAL); doc.rect(M,y,3,100,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(255,255,255);
-  doc.text('¿Lo terminamos contigo?', M+16, y+26);
+  doc.text('¿Cuál te sirve? Lo vemos contigo', M+16, y+26);
   doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(200,194,212);
   doc.text(doc.splitTextToSize(pdfSafe(
-    'Este borrador ya trae la estructura, tus perfiles y tu calendario. Lo que falta —el objetivo de cada curso, la vinculación con tu metodología de riesgos y el calendario de difusión firmado— lo revisamos contigo en una llamada. Sin costo y sin compromiso.'), ANCHO-40), M+16, y+45);
+    'En una llamada te decimos cuál de las dos te conviene y terminamos lo que le falta a este borrador: el objetivo de cada curso, la vinculación con tu metodología de riesgos y el calendario de difusión. Sin costo y sin compromiso.'), ANCHO-40), M+16, y+45);
   doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(135,216,149);
   doc.text(pdfSafe('WhatsApp ' + CONFIG.whatsappVisible + '   ·   ' + CONFIG.correo), M+16, y+86);
 
