@@ -5,6 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cotizador de Capacitación Anual 2026 · 360Educa</title>
 <meta name="description" content="Calcula en un minuto qué nivel de capacitación anual en PLD/FT le corresponde a cada perfil de tu plantilla y descarga tu cotización.">
+
+<!-- ══════════════════════════════════════════════════════════════
+     VISTA PREVIA AL COMPARTIR  (Open Graph)
+     Es lo que se ve cuando alguien pega esta liga en LinkedIn,
+     WhatsApp, Facebook o un anuncio. Sin esto sale un recuadro gris.
+     Las direcciones tienen que ser absolutas y del dominio real:
+     si el cotizador cambia de dirección, hay que actualizarlas.
+     ══════════════════════════════════════════════════════════════ -->
+<meta property="og:type"        content="website">
+<meta property="og:site_name"   content="360Educa">
+<meta property="og:locale"      content="es_MX">
+<meta property="og:url"         content="https://cotiza-capanual-360educa.netlify.app/">
+<meta property="og:title"       content="Deja lista la capacitación anual de tu institución en dos minutos">
+<meta property="og:description" content="Dinos cómo se reparte tu plantilla y te devolvemos el programa completo, perfil por perfil, con el descuento por volumen aplicado y una cotización con folio lista para presentar.">
+<meta property="og:image"       content="https://cotiza-capanual-360educa.netlify.app/assets/hero.jpg">
+<meta property="og:image:width"  content="1600">
+<meta property="og:image:height" content="900">
+<meta property="og:image:alt"   content="Capacitación anual obligatoria en PLD/FT · Ciclo 2026 · 360Educa">
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="Deja lista la capacitación anual de tu institución en dos minutos">
+<meta name="twitter:description" content="Cotización con folio, perfil por perfil, con descuento por volumen aplicado.">
+<meta name="twitter:image"       content="https://cotiza-capanual-360educa.netlify.app/assets/hero.jpg">
 <style>
 /* ══════════════════════════════════════════════════════════════
    360EDUCA · COTIZADOR DE CAPACITACIÓN ANUAL 2026
@@ -497,6 +519,7 @@ footer b{color:var(--ink)}
 
   <footer>
     <p id="foot-fiscal"></p>
+    <p style="margin-top:14px" id="foot-legal"></p>
     <p style="margin-top:9px" id="foot-brand"></p>
   </footer>
 </main>
@@ -1102,6 +1125,17 @@ const CONFIG = {
                   entrar y el que menos datos deja.                  */
   momentoDatos: 'resultado',
 
+  /* ── DATOS DE PROTECCIÓN DE DATOS PERSONALES ────────────────
+     Esta página recaba nombre, correo y teléfono, así que le aplica
+     la LFPDPPP. El aviso corto va en el formulario y en el pie;
+     la liga lleva al aviso completo.
+     Si urlAviso se deja vacío, el texto se muestra sin liga.        */
+  legal: {
+    responsable: 'Oterces Consultores de México, S.A. de C.V.',
+    domicilio:   'Av. Baja California 274, Piso 2, Int. 2B, Col. Hipódromo, Cuauhtémoc, 06100, CDMX',
+    urlAviso:    ''
+  },
+
   sitio:   '360educa.com',
   correo:  'capacitacion@gmc360.com.mx',
   empresa: '360Educa',
@@ -1291,13 +1325,35 @@ let logoListo=false, logoData=null, logoDim=null;
     'Con gusto revisamos contigo cómo se reparte tu plantilla y te ayudamos a dejar el programa armado. ' +
     'Escríbenos por <a href="#" id="lnk-wa-general">WhatsApp</a> o a <a href="mailto:' + CONFIG.correo + '">' + CONFIG.correo + '</a> ' +
     'y te contestamos el mismo día.';
-  $('priv-txt').textContent =
-    'Usamos estos datos únicamente para emitir tu cotización y darle seguimiento. No los compartimos con terceros y no te vamos a llenar el correo.';
+  (function privacidad(){
+    const L = CONFIG.legal || {};
+    const liga = L.urlAviso
+      ? ' <a href="' + L.urlAviso + '" target="_blank" rel="noopener" style="color:var(--naranja-d);font-weight:700">Consultar el aviso de privacidad</a>.'
+      : '';
+    $('priv-txt').innerHTML =
+      '<b>' + (L.responsable || CONFIG.empresa) + '</b> es responsable del tratamiento de tus datos personales. ' +
+      'Los usamos únicamente para emitir tu cotización y darle seguimiento comercial. ' +
+      'No los compartimos con terceros y no te vamos a llenar el correo.' + liga;
+  })();
   $('foot-fiscal').innerHTML =
     '<b>Sobre esta estimación.</b> Todos los importes están en pesos mexicanos. Las partidas se presentan sin IVA y el impuesto se suma una sola vez al final; los precios publicados en ' + CONFIG.sitio + ' incluyen IVA y aquí aparecen desglosados. ' +
     'De 1 a 4 personas aplica el precio publicado en ' + CONFIG.sitio + '. A partir de 5 personas aplica un descuento por volumen sobre ese mismo precio de lista, calculado con el total de personas de tu institución. ' +
     'Esta herramienta entrega una estimación para efectos de planeación presupuestal; la cotización formal la emite ' + CONFIG.empresa + '.';
-  $('foot-brand').innerHTML = '<b>' + CONFIG.empresa + '</b> · ' + CONFIG.sitio + ' · ' + CONFIG.correo;
+  (function pieLegal(){
+    const L = CONFIG.legal || {};
+    const liga = L.urlAviso
+      ? '<a href="' + L.urlAviso + '" target="_blank" rel="noopener" style="color:var(--naranja-d);font-weight:700;text-decoration:none;border-bottom:1px solid #DCC9EE">Consultar el aviso de privacidad completo</a>'
+      : '<b>Aviso de privacidad disponible a solicitud en ' + CONFIG.correo + '</b>';
+    $('foot-legal').innerHTML =
+      '<b>Aviso de privacidad.</b> ' + (L.responsable || CONFIG.empresa) +
+      (L.domicilio ? ', con domicilio en ' + L.domicilio + ',' : '') +
+      ' es responsable del tratamiento de los datos personales que se recaban en esta página. ' +
+      'Los datos que proporciones —nombre, correo electrónico, teléfono e institución— se utilizan únicamente para emitir tu cotización, ' +
+      'darle seguimiento comercial y ponernos en contacto contigo. No se transfieren a terceros sin tu consentimiento. ' +
+      'Puedes ejercer tus derechos de acceso, rectificación, cancelación y oposición, así como revocar tu consentimiento, ' +
+      'escribiendo a ' + CONFIG.correo + '. ' + liga;
+    $('foot-brand').innerHTML = '<b>' + CONFIG.empresa + '</b> · ' + CONFIG.sitio + ' · ' + CONFIG.correo;
+  })();
 })();
 
 /* ── Filas ── */
@@ -2611,6 +2667,7 @@ function generarPDF(datos, r){
   const cond = doc.splitTextToSize(
     'Todos los importes están en pesos mexicanos. Las partidas se presentan sin IVA y el impuesto se suma una sola vez al final; los precios de lista publicados en ' + CONFIG.sitio + ' incluyen IVA y aquí aparecen desglosados. '
     + 'De 1 a 4 personas aplica el precio publicado en ' + CONFIG.sitio + '. A partir de 5 personas aplica un descuento por volumen sobre ese precio de lista, calculado con el total de personas de la institución. '
+    + 'Los datos personales recabados para emitir esta cotización son tratados por ' + (CONFIG.legal && CONFIG.legal.responsable ? CONFIG.legal.responsable : CONFIG.empresa) + ' conforme a su aviso de privacidad; para ejercer derechos ARCO o revocar el consentimiento, escribir a ' + CONFIG.correo + '. '
     + 'Esta cotización tiene una vigencia de 30 días naturales a partir de su fecha de emisión y constituye una estimación de inversión para efectos de planeación presupuestal; las condiciones definitivas se confirman al formalizar el pedido. '
     + 'Si tu operación requiere un temario propio, horas distintas o modalidad presencial, contamos con capacitación personalizada que se cotiza por proyecto.',
     W-M*2);
