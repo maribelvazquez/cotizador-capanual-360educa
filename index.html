@@ -1060,7 +1060,7 @@ const CONFIG = {
 
   // Píxel de Meta: SOLO el número de identificador (15 o 16 dígitos).
   // Vacío = la página funciona igual, sin medición.
-  pixel: '',
+  pixel: '1466567655519317',
 
   /* ── DESTINO DE LOS PROSPECTOS ──────────────────────────────
      url:     dirección a la que se manda cada cotización descargada.
@@ -1233,6 +1233,23 @@ const cantidades = {}; NIVELES.forEach(n => cantidades[n.id] = 0);
   fbq('init', CONFIG.pixel); fbq('track','PageView');
 })();
 function ev(nombre, datos){ try{ if(window.fbq) fbq('track', nombre, datos||{}); }catch(e){} }
+
+/* ── Origen de la visita ──
+   Lee las etiquetas utm_ de la liga del anuncio (y las guarda por si la
+   persona navega dentro de la página) para saber qué anuncio trajo a cada
+   prospecto. Sin etiquetas, queda la frase de siempre.                    */
+const ORIGEN_BASE = 'Cotizador capacitación anual ' + CONFIG.ciclo;
+const _utm = (function(){
+  const q = new URLSearchParams(location.search), o = {};
+  ['utm_source','utm_medium','utm_campaign','utm_content'].forEach(k => { const v=q.get(k); if(v) o[k]=v.slice(0,60); });
+  try{ if(Object.keys(o).length) sessionStorage.setItem('utm360', JSON.stringify(o));
+       else Object.assign(o, JSON.parse(sessionStorage.getItem('utm360')||'{}')); }catch(e){}
+  return o;
+})();
+function origenVisita(){
+  const partes = ['utm_source','utm_medium','utm_campaign','utm_content'].map(k=>_utm[k]).filter(Boolean);
+  return partes.length ? ORIGEN_BASE + ' · ' + partes.join(' / ') : ORIGEN_BASE;
+}
 
 /* ── Marca y textos que dependen de CONFIG ── */
 let logoListo=false, logoData=null, logoDim=null;
@@ -1722,7 +1739,7 @@ function enviarProspecto(datos, r){
   v[C.total]        = r.total;
   v[C.folio]        = datos.folio;
   v[C.detalle]      = r.lineas.map(l => l.qty + ' x ' + l.course).join(' | ');
-  v[C.origen]       = 'Cotizador capacitación anual ' + CONFIG.ciclo;
+  v[C.origen]       = origenVisita();
   if (C.inicio) v[C.inicio] = datos.inicioTexto || '';
 
   /* Destino principal: el CRM */
@@ -1767,7 +1784,7 @@ $('b-go').addEventListener('click', () => {
   $('h-total').value     = r.total;
   $('h-folio').value     = cliente.folio;
   $('h-detalle').value   = r.lineas.map(l => l.qty + ' x ' + l.course).join(' | ');
-  $('h-origen').value    = 'Cotizador capacitación anual ' + CONFIG.ciclo;
+  $('h-origen').value    = origenVisita();
   $('h-inicio').value    = cliente.inicioTexto || '';
 
   /* El prospecto se registra AQUÍ, en el momento en que se identifica,
